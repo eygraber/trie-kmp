@@ -1,0 +1,75 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  benchmark-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version-file: .ci-java-version
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+
+      - name: Run JVM benchmark
+        run: ./gradlew :benchmarks:jvmBenchmark
+
+      - name: Run Node JS benchmark
+        run: ./gradlew :benchmarks:jsBenchmark
+
+      - name: Run Native Linux benchmark
+        run: ./gradlew :benchmarks:linuxX64Benchmark
+
+  benchmark-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version-file: .ci-java-version
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+
+      - name: Run Native Mac X64 benchmark
+        run: ./gradlew :benchmarks:macosX64Benchmark
+
+      - name: Run Native Mac ARM64 benchmark
+        run: ./gradlew :benchmarks:macosArm64Benchmark
+
+      - name: Run Native ios Simulator ARM64 benchmark
+        run: ./gradlew :benchmarks:iosSimulatorArm64Benchmark
+
+  benchmark-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version-file: .ci-java-version
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+
+      - name: Run Native Mingw benchmark
+        run: ./gradlew :benchmarks:mingwX64Benchmark
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx16g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1024m"

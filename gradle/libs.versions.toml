@@ -1,0 +1,44 @@
+[versions]
+agp = "8.11.0"
+
+android-sdk-compile = "35"
+android-sdk-target = "35"
+android-sdk-min = "24"
+
+conventions = "0.0.86"
+
+detekt = "1.23.8"
+detektEygraber = "1.0.11"
+
+dokka = "2.0.0"
+
+kotlin = "2.2.0"
+kotlinxBenchmarks = "0.4.14"
+
+ktlint = "1.6.0"
+
+publish = "0.33.0"
+
+[plugins]
+allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+benchmarks = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinxBenchmarks" }
+conventions = { id = "com.eygraber.conventions", version.ref = "conventions" }
+
+[libraries]
+buildscript-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+buildscript-androidCacheFix = { module = "gradle.plugin.org.gradle.android:android-cache-fix-gradle-plugin", version = "3.0.1" }
+buildscript-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+buildscript-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+buildscript-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+buildscript-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "publish" }
+
+detektEygraber-formatting = { module = "com.eygraber.detekt.rules:formatting", version.ref = "detektEygraber" }
+detektEygraber-style = { module = "com.eygraber.detekt.rules:style", version.ref = "detektEygraber" }
+
+kotlinx-benchmarks = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmarks" }
+
+# not actually used; just here so renovate picks it up
+ktlint = { module = "com.pinterest.ktlint:ktlint-bom", version.ref = "ktlint" }
+
+test-kotlin = { module = "org.jetbrains.kotlin:kotlin-test" }
+test-kotlin-annotations = { module = "org.jetbrains.kotlin:kotlin-test-annotations-common" }
