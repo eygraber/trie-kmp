@@ -4,8 +4,8 @@ trie-kmp is a lightweight, efficient, and idiomatic library providing Trie data 
 
 The library offers two primary implementations:
 
- - CompactTrie: A memory-efficient Trie that compresses non-branching paths.
- - MapTrie: A classic, standard Trie.
+ - `CompactTrie`: A memory-efficient Trie that compresses non-branching paths.
+ - `MapTrie`: A classic, standard Trie.
 
 This allows developers to choose the optimal data structure for their specific use case, whether it's for
 autocomplete systems, spell checkers, IP routing tables, or any other prefix-based application.
@@ -34,12 +34,12 @@ Use the `mutableTrieOf()` and `mutableCompactTrieOf()` builder functions for eas
 // Create a standard Trie
 val standardTrie = mutableTrieOf(
     "apple" to "A fruit",
-    "apply" to "To make a formal request"
+    "apply" to "To make a formal request",
 )
 
 // Create a memory-efficient compact Trie
 val compactTrie = mutableCompactTrieOf(
-    "banana" to "A long yellow fruit"
+    "banana" to "A long yellow fruit",
 )
 ```
 
@@ -70,7 +70,7 @@ val trie = compactTrieOf(
     "team" to 1,
     "tea" to 2,
     "teammate" to 3,
-    "ten" to 4
+    "ten" to 4,
 )
 
 // Get all keys that start with "tea"
@@ -117,7 +117,7 @@ val geneTrie = genericCompactTrieOf(
 
 // Find all genes that start with the sequence A -> T
 val atPrefixGenes = geneTrie.getAllWithPrefix(
-    listOf(DnaSegment('A'), DnaSegment('T'))
+    listOf(DnaSegment('A'), DnaSegment('T')),
 )
 
 // atPrefixGenes will contain both "Gene for Eye Color" and "Gene for Height"
@@ -153,6 +153,6 @@ The best choice depends on your specific workload.
      - You can afford the higher memory usage.
      - You prefer a simpler, more readable implementation for easier debugging or educational purposes.
 
-**General Guideline: For most common use cases like **autocomplete**, the performance is very close. Start with
+**General Guideline**: For most common use cases like **autocomplete**, the performance is very close. Start with
 `CompactTrie` for its superior memory profile. Only switch to the `MapTrie` if benchmarks of your specific application
 show that you are bottlenecked by a very high volume of individual `get`/`containsKey` calls.
