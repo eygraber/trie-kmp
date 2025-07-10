@@ -47,9 +47,6 @@ jobs:
       - name: Run Native Mac ARM64 benchmark
         run: ./gradlew :benchmarks:macosArm64Benchmark
 
-      - name: Run Native ios Simulator ARM64 benchmark
-        run: ./gradlew :benchmarks:iosSimulatorArm64Benchmark
-
   benchmark-windows:
     runs-on: windows-latest
     steps:

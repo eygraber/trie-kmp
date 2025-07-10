@@ -38,7 +38,6 @@ allOpen {
 
 benchmark {
   targets {
-    register("iosSimulatorArm64")
     register("js")
     register("jvm")
     register("linuxX64")
