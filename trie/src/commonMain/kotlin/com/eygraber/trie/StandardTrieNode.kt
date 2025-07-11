@@ -1,5 +1,7 @@
 package com.eygraber.trie
 
+import androidx.collection.SimpleArrayMap
+
 /**
  * Represents a node in a [Trie], mapping sequence elements to values.
  *
@@ -10,7 +12,7 @@ internal class StandardTrieNode<K, V> {
   /**
    * A map where keys are sequence elements and values are the corresponding child [StandardTrieNode]s.
    */
-  val children: MutableMap<K, StandardTrieNode<K, V>> = mutableMapOf()
+  val children: SimpleArrayMap<K, StandardTrieNode<K, V>> = SimpleArrayMap()
 
   /**
    * The value associated with the key that ends at this node.

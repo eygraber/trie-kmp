@@ -9,16 +9,42 @@
     <JavaCodeStyleSettings>
       <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="200" />
       <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="200" />
+      <option name="IMPORT_LAYOUT_TABLE">
+        <value>
+          <package name="" withSubpackages="true" static="false" module="true" />
+          <package name="android" withSubpackages="true" static="true" />
+          <package name="androidx" withSubpackages="true" static="true" />
+          <package name="com" withSubpackages="true" static="true" />
+          <package name="junit" withSubpackages="true" static="true" />
+          <package name="net" withSubpackages="true" static="true" />
+          <package name="org" withSubpackages="true" static="true" />
+          <package name="java" withSubpackages="true" static="true" />
+          <package name="javax" withSubpackages="true" static="true" />
+          <package name="" withSubpackages="true" static="true" />
+          <emptyLine />
+          <package name="android" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="androidx" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="com" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="junit" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="net" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="org" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="java" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="javax" withSubpackages="true" static="false" />
+          <emptyLine />
+          <package name="" withSubpackages="true" static="false" />
+          <emptyLine />
+        </value>
+      </option>
     </JavaCodeStyleSettings>
     <JetCodeStyleSettings>
       <option name="SPACE_BEFORE_WHEN_PARENTHESES" value="false" />
-      <option name="CONTINUATION_INDENT_IN_PARAMETER_LISTS" value="false" />
-      <option name="CONTINUATION_INDENT_IN_ARGUMENT_LISTS" value="false" />
-      <option name="CONTINUATION_INDENT_FOR_EXPRESSION_BODIES" value="false" />
-      <option name="CONTINUATION_INDENT_FOR_CHAINED_CALLS" value="false" />
-      <option name="CONTINUATION_INDENT_IN_SUPERTYPE_LISTS" value="false" />
-      <option name="CONTINUATION_INDENT_IN_IF_CONDITIONS" value="false" />
-      <option name="CONTINUATION_INDENT_IN_ELVIS" value="false" />
     </JetCodeStyleSettings>
     <editorconfig>
       <option name="ENABLED" value="false" />
@@ -1329,9 +1355,6 @@
       <option name="SPACE_BEFORE_FOR_PARENTHESES" value="false" />
       <option name="SPACE_BEFORE_CATCH_PARENTHESES" value="false" />
       <option name="METHOD_PARAMETERS_WRAP" value="1" />
-      <option name="METHOD_PARAMETERS_LPAREN_ON_NEXT_LINE" value="true" />
-      <option name="METHOD_PARAMETERS_RPAREN_ON_NEXT_LINE" value="true" />
-      <option name="ASSIGNMENT_WRAP" value="1" />
       <option name="METHOD_ANNOTATION_WRAP" value="1" />
       <option name="FIELD_ANNOTATION_WRAP" value="1" />
       <indentOptions>

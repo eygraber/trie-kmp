@@ -17,8 +17,8 @@ import kotlinx.benchmark.Warmup
 import kotlin.random.Random
 
 @State(Scope.Benchmark)
-@Warmup(iterations = 10, time = 500, timeUnit = BenchmarkTimeUnit.MILLISECONDS)
-@Measurement(iterations = 20, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Measurement(iterations = 10, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
 @OutputTimeUnit(BenchmarkTimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 class StringTrieBenchmarks {
@@ -43,8 +43,8 @@ class StringTrieBenchmarks {
       randomWord to index
     }
 
-    standardTrie = mutableTrieOf(*dataset.toTypedArray())
     compactTrie = mutableCompactTrieOf(*dataset.toTypedArray())
+    standardTrie = mutableTrieOf(*dataset.toTypedArray())
 
     prefixes = List(1000) {
       val word = dataset[random.nextInt(0, datasetSize)].first
@@ -67,21 +67,17 @@ class StringTrieBenchmarks {
   }
 
   @Benchmark
-  fun compactStringTriePrefixSearch(): List<Int> {
-    val results = mutableListOf<Int>()
+  fun compactStringTriePrefixSearch(blackhole: Blackhole) {
     for(prefix in prefixes) {
-      results.addAll(compactTrie.getAllValuesWithPrefix(prefix))
+      blackhole.consume(compactTrie.getAllValuesWithPrefix(prefix))
     }
-    return results
   }
 
   @Benchmark
-  fun standardStringTriePrefixSearch(): List<Int> {
-    val results = mutableListOf<Int>()
+  fun standardStringTriePrefixSearch(blackhole: Blackhole) {
     for(prefix in prefixes) {
-      results.addAll(standardTrie.getAllValuesWithPrefix(prefix))
+      blackhole.consume(standardTrie.getAllValuesWithPrefix(prefix))
     }
-    return results
   }
 
   @Benchmark

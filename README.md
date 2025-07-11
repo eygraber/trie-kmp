@@ -144,22 +144,25 @@ The best choice depends on your specific workload.
 
 ##### For `String` Keys
 
-| Benchmark                            | StandardStringTrie (`trieOf`) | CompactStringTrie (`compactTrieOf`) | Winner                             | 
-|:-------------------------------------|:------------------------------|:------------------------------------|:-----------------------------------| 
-| **Creation Time**                    | ~11.8 ms/op                   | **~5.1 ms/op**                      | **CompactStringTrie**              | 
-| **Prefix Search / Autocomplete**     | ~0.21 ms/op                   | **~0.09 ms/op**                     | **CompactStringTrie**              | 
-| **Individual Lookups (Spell Check)** | **~5.6 ms/op**                | ~7.0 ms/op                          | **StandardStringTrie**             |
-| **Removal**                          | **~0.04 ms/op**               | ~0.05 ms/op                         | **StandardStringTrie**  (Slightly) |
-| **Memory Usage (Node Count)**        | High                          | **Low**                             | **CompactStringTrie**              |
+| Benchmark                            | StandardStringTrie (`trieOf`) | CompactStringTrie (`compactTrieOf`) | Winner                            |
+|:-------------------------------------|:------------------------------|:------------------------------------|:----------------------------------|
+| **Creation Time**                    | ~13.3 ms/op                   | **~5.5 ms/op**                      | **CompactStringTrie**             |
+| **Prefix Search**                    | ~0.15 ms/op                   | **~0.08 ms/op**                     | **CompactStringTrie**             |
+| **Autocomplete**                     | ~0.07 ms/op                   | **~0.05 ms/op**                     | **CompactStringTrie**             |
+| **Individual Lookups (Spell Check)** | **~7.2 ms/op**                | ~7.3 ms/op                          | **StandardStringTrie** (Slightly) |
+| **Removal**                          | ~0.09 ms/op                   | **~0.05 ms/op**                     | **CompactStringTrie**             |
+| **Memory Usage (Node Count)**        | High                          | **Low**                             | **CompactStringTrie**             |
 
 ##### For Generic Keys (e.g. `List<Int>`)
 
-| Benchmark                     | StandardGenericTrie (`genericTrieOf`) | CompactGenericTrie (`compactGenericTrieOf`) | Winner                  | 
-|:------------------------------|:--------------------------------------|:--------------------------------------------|:------------------------| 
-| **Creation Time**             | **~23.4 ms/op**                       | ~37.3 ms/op                                 | **StandardGenericTrie** | 
-| **Prefix Search**             | ~0.58 ms/op                           | **~0.49 ms/op**                             | **CompactGenericTrie**  | 
-| **Removal**                   | **~0.16 ms/op**                       | ~0.58 ms/op                                 | **StandardGenericTrie** |
-| **Memory Usage (Node Count)** | High                                  | **Low**                                     | **CompactGenericTrie**  |
+| Benchmark                            | StandardGenericTrie (`genericTrieOf`) | CompactGenericTrie (`compactGenericTrieOf`) | Winner                             |
+|:-------------------------------------|:--------------------------------------|:--------------------------------------------|:-----------------------------------|
+| **Creation Time**                    | **~16.67 ms/op**                      | ~22.2 ms/op                                 | **StandardGenericTrie**            |
+| **Prefix Search**                    | ~0.35 ms/op                           | **~0.20 ms/op**                             | **CompactGenericTrie**             |
+| **Autocomplete**                     | **~0.10 ms/op**                       | ~0.11 ms/op                                 | **StandardGenericTrie** (Slightly) |
+| **Individual Lookups (Spell Check)** | **~8.7 ms/op**                        | ~10.9 ms/op                                 | **StandardGenericTrie**            |
+| **Removal**                          | **~0.16 ms/op**                       | ~0.25 ms/op                                 | **StandardGenericTrie**            |
+| **Memory Usage (Node Count)**        | High                                  | **Low**                                     | **CompactGenericTrie**             |
 
 #### Recommendations
 
