@@ -1,7 +1,6 @@
 package com.eygraber.trie.benchmark
 
-import com.eygraber.trie.Trie
-import com.eygraber.trie.getAllValuesWithPrefix
+import com.eygraber.trie.MutableTrie
 import com.eygraber.trie.mutableCompactTrieOf
 import com.eygraber.trie.mutableTrieOf
 import kotlinx.benchmark.Benchmark
@@ -29,11 +28,10 @@ class StringTrieBenchmarks {
 
   private lateinit var dataset: List<Pair<String, Int>>
   private lateinit var prefixes: List<String>
+  private lateinit var removals: List<String>
 
-  private lateinit var trie: Trie<Char, Int>
-  private lateinit var compactTrie: Trie<Char, Int>
-  private lateinit var hashMap: Map<String, Int>
-  private lateinit var list: List<Pair<String, Int>>
+  private lateinit var compactTrie: MutableTrie<String, Int>
+  private lateinit var standardTrie: MutableTrie<String, Int>
 
   @Setup
   fun setup() {
@@ -45,38 +43,31 @@ class StringTrieBenchmarks {
       randomWord to index
     }
 
-    trie = mutableTrieOf(*dataset.toTypedArray())
+    standardTrie = mutableTrieOf(*dataset.toTypedArray())
     compactTrie = mutableCompactTrieOf(*dataset.toTypedArray())
-    hashMap = dataset.toMap()
-    list = dataset
 
     prefixes = List(1000) {
       val word = dataset[random.nextInt(0, datasetSize)].first
       word.substring(0, word.length / 2)
     }
+
+    removals = List(1000) {
+      dataset[random.nextInt(0, datasetSize)].first
+    }
   }
 
   @Benchmark
-  fun stringTrieCreation(blackhole: Blackhole) {
-    blackhole.consume(mutableTrieOf(*dataset.toTypedArray()))
-  }
-
-  @Benchmark
-  fun stringCompactTrieCreation(blackhole: Blackhole) {
+  fun compactStringTrieCreation(blackhole: Blackhole) {
     blackhole.consume(mutableCompactTrieOf(*dataset.toTypedArray()))
   }
 
   @Benchmark
-  fun stringTriePrefixSearch(): List<Int> {
-    val results = mutableListOf<Int>()
-    for(prefix in prefixes) {
-      results.addAll(trie.getAllValuesWithPrefix(prefix))
-    }
-    return results
+  fun standardStringTrieCreation(blackhole: Blackhole) {
+    blackhole.consume(mutableTrieOf(*dataset.toTypedArray()))
   }
 
   @Benchmark
-  fun stringCompactTriePrefixSearch(): List<Int> {
+  fun compactStringTriePrefixSearch(): List<Int> {
     val results = mutableListOf<Int>()
     for(prefix in prefixes) {
       results.addAll(compactTrie.getAllValuesWithPrefix(prefix))
@@ -85,26 +76,25 @@ class StringTrieBenchmarks {
   }
 
   @Benchmark
-  fun stringHashMapLinearScan(): List<Int> {
+  fun standardStringTriePrefixSearch(): List<Int> {
     val results = mutableListOf<Int>()
     for(prefix in prefixes) {
-      val values = hashMap.keys
-        .filter { it.startsWith(prefix) }
-        .mapNotNull { hashMap[it] }
-      results.addAll(values)
+      results.addAll(standardTrie.getAllValuesWithPrefix(prefix))
     }
     return results
   }
 
   @Benchmark
-  fun stringListLinearScan(): List<Int> {
-    val results = mutableListOf<Int>()
-    for(prefix in prefixes) {
-      val values = list
-        .filter { it.first.startsWith(prefix) }
-        .map { it.second }
-      results.addAll(values)
+  fun compactStringTrieRemoval(blackhole: Blackhole) {
+    for(removal in removals) {
+      blackhole.consume(compactTrie.remove(removal))
     }
-    return results
+  }
+
+  @Benchmark
+  fun standardStringTrieRemoval(blackhole: Blackhole) {
+    for(removal in removals) {
+      blackhole.consume(standardTrie.remove(removal))
+    }
   }
 }

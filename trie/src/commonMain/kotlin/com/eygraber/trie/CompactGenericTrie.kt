@@ -1,24 +1,25 @@
 package com.eygraber.trie
 
 /**
- * A compact implementation of a mutable, map-like "Patricia" Trie.
+ * A compact implementation of a [MutableTrie] and [GenericTrie].
  *
- * @param E The type of the elements in the key sequences.
+ * @param K The type of the elements in the key sequences.
  * @param V The type of the values.
  */
-public class CompactTrie<E, V> : AbstractTrie<E, V>() {
-  private val root = CompactTrieNode<E, V>(emptyList())
+public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<List<K>, V>() {
+  private val root = CompactTrieNode<K, V>(emptyList())
   private var internalSize = 0
 
   override val size: Int get() = internalSize
 
-  override val entries: MutableSet<MutableMap.MutableEntry<List<E>, V>>
-    get() = object : AbstractMutableSet<MutableMap.MutableEntry<List<E>, V>>() {
-      override val size: Int get() = this@CompactTrie.size
+  override val entries: MutableSet<MutableMap.MutableEntry<List<K>, V>>
+    get() = object : AbstractMutableSet<MutableMap.MutableEntry<List<K>, V>>() {
+      override val size: Int get() = this@CompactGenericTrie.size
 
-      override fun iterator(): MutableIterator<MutableMap.MutableEntry<List<E>, V>> {
-        val allEntries = mutableListOf<MutableMap.MutableEntry<List<E>, V>>()
-        fun collectAll(node: CompactTrieNode<E, V>, currentPath: MutableList<E>) {
+      override fun iterator(): MutableIterator<MutableMap.MutableEntry<List<K>, V>> {
+        val allEntries = mutableListOf<MutableMap.MutableEntry<List<K>, V>>()
+
+        fun collectAll(node: CompactTrieNode<K, V>, currentPath: MutableList<K>) {
           node.value?.let { allEntries.add(TrieEntry(currentPath.toList(), it)) }
           node.children.values.forEach { child ->
             currentPath.addAll(child.keyPart)
@@ -26,14 +27,16 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
             repeat(child.keyPart.size) { currentPath.removeAt(currentPath.lastIndex) }
           }
         }
+
         collectAll(root, mutableListOf())
 
         val backingIterator = allEntries.iterator()
-        var lastEntry: MutableMap.MutableEntry<List<E>, V>? = null
+        var lastEntry: MutableMap.MutableEntry<List<K>, V>? = null
 
-        return object : MutableIterator<MutableMap.MutableEntry<List<E>, V>> {
+        return object : MutableIterator<MutableMap.MutableEntry<List<K>, V>> {
           override fun hasNext(): Boolean = backingIterator.hasNext()
-          override fun next(): MutableMap.MutableEntry<List<E>, V> {
+
+          override fun next(): MutableMap.MutableEntry<List<K>, V> {
             val entry = backingIterator.next()
             lastEntry = entry
             return entry
@@ -41,17 +44,17 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
 
           override fun remove() {
             checkNotNull(lastEntry)
-            this@CompactTrie.remove(lastEntry.key)
+            this@CompactGenericTrie.remove(lastEntry.key)
             backingIterator.remove()
           }
         }
       }
 
-      override fun add(element: MutableMap.MutableEntry<List<E>, V>): Boolean = throw UnsupportedOperationException()
+      override fun add(element: MutableMap.MutableEntry<List<K>, V>): Boolean = throw UnsupportedOperationException()
     }
 
   @Suppress("ReturnCount")
-  override fun get(key: List<E>): V? {
+  override fun get(key: List<K>): V? {
     var currentNode = root
     var searchKey = key
 
@@ -70,7 +73,7 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   @Suppress("ReturnCount")
-  override fun put(key: List<E>, value: V): V? {
+  override fun put(key: List<K>, value: V): V? {
     var currentNode = root
     var searchKey = key
 
@@ -132,8 +135,8 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   @Suppress("ReturnCount")
-  override fun remove(key: List<E>): V? {
-    var parent: CompactTrieNode<E, V>? = null
+  override fun remove(key: List<K>): V? {
+    var parent: CompactTrieNode<K, V>? = null
     var currentNode = root
     var searchKey = key
 
@@ -177,7 +180,7 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   @Suppress("ReturnCount")
-  override fun startsWith(prefix: List<E>): Boolean {
+  override fun startsWith(prefix: List<K>): Boolean {
     var currentNode = root
     var searchKey = prefix
     while(searchKey.isNotEmpty()) {
@@ -203,11 +206,11 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   @Suppress("ReturnCount")
-  override fun getAllWithPrefix(prefix: List<E>): Map<List<E>, V> {
-    val results = mutableMapOf<List<E>, V>()
+  override fun getAllWithPrefix(prefix: List<K>): Map<List<K>, V> {
+    val results = mutableMapOf<List<K>, V>()
     var currentNode = root
     var searchKey = prefix
-    val path = mutableListOf<E>()
+    val path = mutableListOf<K>()
 
     while(searchKey.isNotEmpty()) {
       val child = currentNode.children[searchKey.first()] ?: return emptyMap()
@@ -239,7 +242,7 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   @Suppress("ReturnCount")
-  override fun getAllValuesWithPrefix(prefix: List<E>): Collection<V> {
+  override fun getAllValuesWithPrefix(prefix: List<K>): Collection<V> {
     var currentNode = root
     var searchKey = prefix
 
@@ -269,9 +272,9 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   private fun collectAll(
-    node: CompactTrieNode<E, V>,
-    path: MutableList<E>,
-    results: MutableMap<List<E>, V>,
+    node: CompactTrieNode<K, V>,
+    path: MutableList<K>,
+    results: MutableMap<List<K>, V>,
   ) {
     node.children.forEach { (_, childNode) ->
       path.addAll(childNode.keyPart)
@@ -284,7 +287,7 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   private fun collectAllValues(
-    node: CompactTrieNode<E, V>,
+    node: CompactTrieNode<K, V>,
     results: MutableList<V>,
   ) {
     node.children.forEach { (_, childNode) ->
@@ -296,9 +299,9 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   private fun collectAllFromNode(
-    node: CompactTrieNode<E, V>,
-    currentPath: MutableList<E>,
-    results: MutableMap<List<E>, V>,
+    node: CompactTrieNode<K, V>,
+    currentPath: MutableList<K>,
+    results: MutableMap<List<K>, V>,
   ) {
     if(node.isKeyNode()) {
       results[currentPath.toList()] = requireNotNull(node.value)
@@ -310,7 +313,7 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
     }
   }
 
-  private fun collectAllValuesFromNode(node: CompactTrieNode<E, V>, results: MutableList<V>) {
+  private fun collectAllValuesFromNode(node: CompactTrieNode<K, V>, results: MutableList<V>) {
     if(node.isKeyNode()) {
       results.add(requireNotNull(node.value))
     }
@@ -321,17 +324,17 @@ public class CompactTrie<E, V> : AbstractTrie<E, V>() {
 }
 
 /**
- * Represents a node in a CompactTrie (Patricia Trie).
+ * Represents a node in a [CompactGenericTrie].
  * Each node stores a part of a key (a prefix) rather than a single character.
  *
- * @param E The type of element in the key sequence.
+ * @param K The type of element in the key sequence.
  * @param V The type of value stored in the Trie.
  */
-private class CompactTrieNode<E, V>(
-  var keyPart: List<E>,
+internal class CompactTrieNode<K, V>(
+  var keyPart: List<K>,
   var value: V? = null,
 ) {
-  val children: MutableMap<E, CompactTrieNode<E, V>> = mutableMapOf()
+  val children: MutableMap<K, CompactTrieNode<K, V>> = mutableMapOf()
 
   fun isKeyNode(): Boolean = value != null
 

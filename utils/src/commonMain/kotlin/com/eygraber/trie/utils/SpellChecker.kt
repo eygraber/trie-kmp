@@ -1,28 +1,44 @@
 package com.eygraber.trie.utils
 
+import com.eygraber.trie.GenericTrie
 import com.eygraber.trie.Trie
+
+class StringSpellChecker(
+  private val dictionary: Trie<String, Boolean>,
+) : SpellChecker() {
+  override fun suggest(word: String): Set<String> {
+    // If the word is already correct, return it.
+    if(word in dictionary) return setOf(word)
+
+    return edits1(word).filter { it in dictionary }.toSet()
+  }
+}
+
+class CharSpellChecker(
+  private val dictionary: GenericTrie<Char, Boolean>,
+) : SpellChecker() {
+  override fun suggest(word: String): Set<String> {
+    // If the word is already correct, return it.
+    if(word.toList() in dictionary) return setOf(word)
+
+    return edits1(word).filter { it.toList() in dictionary }.toSet()
+  }
+}
 
 /**
  * A simple spell checker that suggests corrections for a given word.
  * It uses a Trie-based dictionary for efficient lookups.
  */
-class SpellChecker(
-  private val dictionary: Trie<Char, Boolean>,
-) {
+abstract class SpellChecker {
   private val alphabet = "abcdefghijklmnopqrstuvwxyz"
 
   /**
    * Finds spelling suggestions for a word from a dictionary.
    * This implementation checks for known words at edit distance of 1.
    */
-  fun suggest(word: String): Set<String> {
-    // If the word is already correct, return it.
-    if(dictionary.containsKey(word.toList())) return setOf(word)
+  abstract fun suggest(word: String): Set<String>
 
-    return edits1(word).filter { dictionary.containsKey(it.toList()) }.toSet()
-  }
-
-  private fun edits1(word: String): Set<String> {
+  protected fun edits1(word: String): Set<String> {
     val edits = mutableSetOf<String>()
     // 1. Deletions (remove one character)
     for(i in word.indices) {

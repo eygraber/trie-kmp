@@ -1,12 +1,12 @@
 package com.eygraber.trie
 
-import com.eygraber.trie.utils.AutoComplete
+import com.eygraber.trie.utils.StringAutoComplete
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-abstract class AutoCompleteTrieTest {
-  abstract fun createTrie(vararg words: Pair<String, Int>): Trie<Char, Int>
+abstract class AutoCompleteStringTrieTest {
+  abstract fun createTrie(vararg words: Pair<String, Int>): Trie<String, Int>
 
   @Test
   fun `it suggests all possible completions for a prefix`() {
@@ -18,7 +18,7 @@ abstract class AutoCompleteTrieTest {
       "banana" to 5,
     )
 
-    val autoComplete = AutoComplete(trie)
+    val autoComplete = StringAutoComplete(trie)
     val suggestions = autoComplete.suggest("app")
 
     assertEquals(setOf("apple", "application", "apple pie", "apply"), suggestions)
@@ -27,16 +27,18 @@ abstract class AutoCompleteTrieTest {
   @Test
   fun `it suggests nothing for a prefix with no matches`() {
     val trie = createTrie("hello" to 1, "world" to 2)
-    val autoComplete = AutoComplete(trie)
+    val autoComplete = StringAutoComplete(trie)
     val suggestions = autoComplete.suggest("xyz")
     assertTrue(suggestions.isEmpty())
   }
 }
 
-class CompactAutocompleteTest : AutoCompleteTrieTest() {
-  override fun createTrie(vararg words: Pair<String, Int>): Trie<Char, Int> = mutableCompactTrieOf(*words)
+class CompactAutoCompleteStringTrieTest : AutoCompleteStringTrieTest() {
+  override fun createTrie(vararg words: Pair<String, Int>): Trie<String, Int> =
+    mutableCompactTrieOf(*words)
 }
 
-class MapAutocompleteTest : AutoCompleteTrieTest() {
-  override fun createTrie(vararg words: Pair<String, Int>): Trie<Char, Int> = mutableTrieOf(*words)
+class StandardAutoCompleteStringTrieTest : AutoCompleteStringTrieTest() {
+  override fun createTrie(vararg words: Pair<String, Int>): Trie<String, Int> =
+    mutableTrieOf(*words)
 }
