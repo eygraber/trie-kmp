@@ -1,5 +1,7 @@
 package com.eygraber.trie
 
+import androidx.collection.SimpleArrayMap
+
 /**
  * A compact implementation of a [MutableTrie] and [GenericTrie].
  *
@@ -21,7 +23,8 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
 
         fun collectAll(node: CompactTrieNode<K, V>, currentPath: MutableList<K>) {
           node.value?.let { allEntries.add(TrieEntry(currentPath.toList(), it)) }
-          node.children.values.forEach { child ->
+          for(i in 0 until node.children.size()) {
+            val child = node.children.valueAt(i)
             currentPath.addAll(child.keyPart)
             collectAll(child, currentPath)
             repeat(child.keyPart.size) { currentPath.removeAt(currentPath.lastIndex) }
@@ -60,15 +63,16 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
 
     while(searchKey.isNotEmpty()) {
       val child = currentNode.children[searchKey.first()] ?: return null
-      val commonPrefixLength = child.keyPart.zip(searchKey).takeWhile { it.first == it.second }.count()
 
+      val commonPrefixLength = child.keyPart.commonPrefixLength(searchKey)
       if(commonPrefixLength < child.keyPart.size) {
         return null // Key diverges within a node's keyPart
       }
 
       currentNode = child
-      searchKey = searchKey.drop(commonPrefixLength)
+      searchKey = searchKey.fastDrop(commonPrefixLength)
     }
+
     return currentNode.value
   }
 
@@ -88,13 +92,12 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
       val child = currentNode.children[searchKey.first()]
       if(child == null) {
         // No child with this prefix, create a new one
-        currentNode.children[searchKey.first()] = CompactTrieNode(searchKey, value)
+        currentNode.children.put(searchKey.first(), CompactTrieNode(searchKey, value))
         internalSize++
         return null
       }
 
-      val commonPrefixLength = child.keyPart.zip(searchKey).takeWhile { it.first == it.second }.count()
-
+      val commonPrefixLength = child.keyPart.commonPrefixLength(searchKey)
       if(commonPrefixLength == searchKey.size && commonPrefixLength == child.keyPart.size) {
         // Exact match, update value
         val oldValue = child.value
@@ -112,7 +115,7 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
         child.keyPart = child.keyPart.take(commonPrefixLength)
         child.value = null
         child.children.clear()
-        child.children[newChild.keyPart.first()] = newChild
+        child.children.put(newChild.keyPart.first(), newChild)
 
         val remainingSearchKey = searchKey.drop(commonPrefixLength)
         if(remainingSearchKey.isEmpty()) {
@@ -122,7 +125,7 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
         }
         else {
           val newBranch = CompactTrieNode(remainingSearchKey, value)
-          child.children[newBranch.keyPart.first()] = newBranch
+          child.children.put(newBranch.keyPart.first(), newBranch)
           internalSize++
           return null
         }
@@ -142,13 +145,13 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
 
     while(searchKey.isNotEmpty()) {
       val child = currentNode.children[searchKey.first()] ?: return null
-      val commonPrefixLength = child.keyPart.zip(searchKey).takeWhile { it.first == it.second }.count()
+      val commonPrefixLength = child.keyPart.commonPrefixLength(searchKey)
 
       if(commonPrefixLength < child.keyPart.size) return null
 
       parent = currentNode
       currentNode = child
-      searchKey = searchKey.drop(commonPrefixLength)
+      searchKey = searchKey.fastDrop(commonPrefixLength)
     }
 
     if(searchKey.isNotEmpty() || !currentNode.isKeyNode()) return null
@@ -161,9 +164,9 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
       // Leaf node, can be removed
       parent?.children?.remove(key.first())
     }
-    else if(currentNode.children.size == 1 && parent != null) {
+    else if(parent != null && currentNode.children.size() == 1) {
       // Node with one child, needs merging with that child
-      val child = currentNode.children.values.first()
+      val child = currentNode.children.valueAt(0)
       currentNode.keyPart = currentNode.keyPart + child.keyPart
       currentNode.value = child.value
       currentNode.children.clear()
@@ -185,7 +188,7 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
     var searchKey = prefix
     while(searchKey.isNotEmpty()) {
       val child = currentNode.children[searchKey.first()] ?: return false
-      val commonPrefixLength = child.keyPart.zip(searchKey).takeWhile { it.first == it.second }.count()
+      val commonPrefixLength = child.keyPart.commonPrefixLength(searchKey)
 
       if(commonPrefixLength < searchKey.size && commonPrefixLength < child.keyPart.size) {
         return false // Prefix diverges inside a node
@@ -199,7 +202,7 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
         return false // Prefix is longer but doesn't match the whole key part
       }
       currentNode = child
-      searchKey = searchKey.drop(commonPrefixLength)
+      searchKey = searchKey.fastDrop(commonPrefixLength)
     }
 
     return true
@@ -214,7 +217,7 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
 
     while(searchKey.isNotEmpty()) {
       val child = currentNode.children[searchKey.first()] ?: return emptyMap()
-      val commonPrefixLength = child.keyPart.zip(searchKey).takeWhile { it.first == it.second }.count()
+      val commonPrefixLength = child.keyPart.commonPrefixLength(searchKey)
 
       if(commonPrefixLength < searchKey.size && commonPrefixLength < child.keyPart.size) {
         return emptyMap()
@@ -228,7 +231,7 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
         break
       }
 
-      searchKey = searchKey.drop(commonPrefixLength)
+      searchKey = searchKey.fastDrop(commonPrefixLength)
     }
 
     // At this point, `currentNode` is the node containing the end of the prefix.
@@ -248,7 +251,7 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
 
     while(searchKey.isNotEmpty()) {
       val child = currentNode.children[searchKey.first()] ?: return emptyList()
-      val commonPrefixLength = child.keyPart.zip(searchKey).takeWhile { it.first == it.second }.count()
+      val commonPrefixLength = child.keyPart.commonPrefixLength(searchKey)
 
       if(commonPrefixLength < searchKey.size && commonPrefixLength < child.keyPart.size) {
         return emptyList()
@@ -260,7 +263,7 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
       }
 
       currentNode = child
-      searchKey = searchKey.drop(commonPrefixLength)
+      searchKey = searchKey.fastDrop(commonPrefixLength)
     }
 
     val results = mutableListOf<V>()
@@ -276,7 +279,8 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
     path: MutableList<K>,
     results: MutableMap<List<K>, V>,
   ) {
-    node.children.forEach { (_, childNode) ->
+    for(i in 0 until node.children.size()) {
+      val childNode = node.children.valueAt(i)
       path.addAll(childNode.keyPart)
       if(childNode.isKeyNode()) {
         results[path.toList()] = requireNotNull(childNode.value)
@@ -290,7 +294,8 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
     node: CompactTrieNode<K, V>,
     results: MutableList<V>,
   ) {
-    node.children.forEach { (_, childNode) ->
+    for(i in 0 until node.children.size()) {
+      val childNode = node.children.valueAt(i)
       if(childNode.isKeyNode()) {
         results.add(requireNotNull(childNode.value))
       }
@@ -306,7 +311,8 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
     if(node.isKeyNode()) {
       results[currentPath.toList()] = requireNotNull(node.value)
     }
-    node.children.values.forEach { child ->
+    for(i in 0 until node.children.size()) {
+      val child = node.children.valueAt(i)
       currentPath.addAll(child.keyPart)
       collectAllFromNode(child, currentPath, results)
       repeat(child.keyPart.size) { currentPath.removeAt(currentPath.lastIndex) }
@@ -317,7 +323,8 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<L
     if(node.isKeyNode()) {
       results.add(requireNotNull(node.value))
     }
-    node.children.values.forEach { child ->
+    for(i in 0 until node.children.size()) {
+      val child = node.children.valueAt(i)
       collectAllValuesFromNode(child, results)
     }
   }
@@ -334,7 +341,7 @@ internal class CompactTrieNode<K, V>(
   var keyPart: List<K>,
   var value: V? = null,
 ) {
-  val children: MutableMap<K, CompactTrieNode<K, V>> = mutableMapOf()
+  val children: SimpleArrayMap<K, CompactTrieNode<K, V>> = SimpleArrayMap()
 
   fun isKeyNode(): Boolean = value != null
 

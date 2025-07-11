@@ -100,7 +100,7 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
       }
 
       // Find the length of the common prefix between the search key and the child's key part
-      val commonPrefixLength = searchKey.commonPrefixWith(child.keyPart).length
+      val commonPrefixLength = searchKey.commonPrefixLength(child.keyPart)
 
       if(commonPrefixLength == searchKey.length && commonPrefixLength == child.keyPart.length) {
         // Exact match, update value

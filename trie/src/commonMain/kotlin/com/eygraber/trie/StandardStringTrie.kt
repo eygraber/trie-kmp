@@ -26,7 +26,9 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
           if(node.isKeyNode()) {
             allEntries.add(TrieEntry(path.toString(), requireNotNull(node.value)))
           }
-          node.children.forEach { (char, childNode) ->
+          for(i in 0 until node.children.size()) {
+            val char = node.children.keyAt(i)
+            val childNode = node.children.valueAt(i)
             path.append(char)
             collect(childNode)
             path.setLength(path.length - 1) // Backtrack
@@ -40,6 +42,7 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
 
         return object : MutableIterator<MutableMap.MutableEntry<String, V>> {
           override fun hasNext() = backingIterator.hasNext()
+
           override fun next(): MutableMap.MutableEntry<String, V> {
             lastEntry = backingIterator.next()
             return lastEntry
@@ -59,8 +62,8 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
   override operator fun get(key: String): V? {
     var currentNode = root
 
-    for(char in key) {
-      currentNode = currentNode.children[char] ?: return null
+    for(i in 0 until key.length) {
+      currentNode = currentNode.children[key[i]] ?: return null
     }
 
     return currentNode.value
@@ -69,8 +72,9 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
   override fun put(key: String, value: V): V? {
     var currentNode = root
 
-    for(char in key) {
-      currentNode = currentNode.children.getOrPut(char) { StandardTrieNode() }
+    for(i in 0 until key.length) {
+      val currentValue = currentNode.children[key[i]]
+      currentNode = currentValue ?: StandardTrieNode<Char, V>().also { currentNode.children.put(key[i], it) }
     }
 
     val oldValue = currentNode.value
@@ -122,8 +126,8 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
   override fun startsWith(prefix: String): Boolean {
     var currentNode = root
 
-    for(char in prefix) {
-      currentNode = currentNode.children[char] ?: return false
+    for(i in 0 until prefix.length) {
+      currentNode = currentNode.children[prefix[i]] ?: return false
     }
 
     return true
@@ -132,8 +136,8 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
   override fun getAllWithPrefix(prefix: String): Map<String, V> {
     var startNode = root
 
-    for(char in prefix) {
-      startNode = startNode.children[char] ?: return emptyMap()
+    for(i in 0 until prefix.length) {
+      startNode = startNode.children[prefix[i]] ?: return emptyMap()
     }
 
     val results = mutableMapOf<String, V>()
@@ -150,8 +154,8 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
   override fun getAllValuesWithPrefix(prefix: String): Collection<V> {
     var startNode = root
 
-    for(char in prefix) {
-      startNode = startNode.children[char] ?: return emptyList()
+    for(i in 0 until prefix.length) {
+      startNode = startNode.children[prefix[i]] ?: return emptyList()
     }
 
     val results = mutableListOf<V>()
@@ -165,7 +169,10 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
   }
 
   private fun collectAll(node: StandardTrieNode<Char, V>, path: StringBuilder, results: MutableMap<String, V>) {
-    node.children.forEach { (char, childNode) ->
+    for(i in 0 until node.children.size()) {
+      val char = node.children.keyAt(i)
+      val childNode = node.children.valueAt(i)
+
       path.append(char)
       if(childNode.isKeyNode()) {
         results[path.toString()] = requireNotNull(childNode.value)
@@ -176,7 +183,8 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
   }
 
   private fun collectAllValues(node: StandardTrieNode<Char, V>, results: MutableList<V>) {
-    node.children.forEach { (_, childNode) ->
+    for(i in 0 until node.children.size()) {
+      val childNode = node.children.valueAt(i)
       if(childNode.isKeyNode()) {
         results.add(requireNotNull(childNode.value))
       }

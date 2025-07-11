@@ -48,4 +48,19 @@ gradleConventionsKmpDefaults {
     isBrowserEnabled = true,
     isBrowserEnabledForLibraryTests = false,
   )
+
+  targets(
+    KmpTarget.Android,
+    // KmpTarget.AndroidNative, https://issuetracker.google.com/issues/430991573
+    KmpTarget.Ios,
+    KmpTarget.Js,
+    KmpTarget.Jvm,
+    KmpTarget.Linux,
+    KmpTarget.Macos,
+    KmpTarget.Mingw,
+    KmpTarget.Tvos,
+    KmpTarget.WasmJs,
+    // KmpTarget.WasmWasi, https://issuetracker.google.com/issues/430991573
+    KmpTarget.Watchos,
+  )
 }

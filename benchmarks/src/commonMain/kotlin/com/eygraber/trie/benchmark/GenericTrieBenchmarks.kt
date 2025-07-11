@@ -22,11 +22,11 @@ data class DnaSegment(
 
 @Suppress("PrivatePropertyName", "VariableNaming")
 @State(Scope.Benchmark)
-@Warmup(iterations = 10, time = 500, timeUnit = BenchmarkTimeUnit.MILLISECONDS)
-@Measurement(iterations = 20, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Measurement(iterations = 10, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
 @OutputTimeUnit(BenchmarkTimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
-class TrieCustomBenchmarks {
+class GenericTrieBenchmarks {
   private val A = DnaSegment('A')
   private val C = DnaSegment('C')
   private val G = DnaSegment('G')
@@ -52,8 +52,8 @@ class TrieCustomBenchmarks {
       randomGene to index
     }
 
-    standardTrie = mutableGenericTrieOf(*dataset.toTypedArray())
     compactTrie = mutableCompactGenericTrieOf(*dataset.toTypedArray())
+    standardTrie = mutableGenericTrieOf(*dataset.toTypedArray())
 
     prefixes = List(1000) {
       val gene = dataset[random.nextInt(0, datasetSize)].first
@@ -76,21 +76,17 @@ class TrieCustomBenchmarks {
   }
 
   @Benchmark
-  fun compactGenericTriePrefixSearch(): List<Int> {
-    val results = mutableListOf<Int>()
+  fun compactGenericTriePrefixSearch(blackhole: Blackhole) {
     for(prefix in prefixes) {
-      results.addAll(compactTrie.getAllValuesWithPrefix(prefix))
+      blackhole.consume(compactTrie.getAllValuesWithPrefix(prefix))
     }
-    return results
   }
 
   @Benchmark
-  fun standardGenericTriePrefixSearch(): List<Int> {
-    val results = mutableListOf<Int>()
+  fun standardGenericTriePrefixSearch(blackhole: Blackhole) {
     for(prefix in prefixes) {
-      results.addAll(standardTrie.getAllValuesWithPrefix(prefix))
+      blackhole.consume(standardTrie.getAllValuesWithPrefix(prefix))
     }
-    return results
   }
 
   @Benchmark

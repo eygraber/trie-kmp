@@ -2,10 +2,12 @@ name: Benchmark
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+  workflow_dispatch:
 
 jobs:
-  benchmark-linux:
+  benchmark-jvm:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,11 +25,41 @@ jobs:
       - name: Run JVM benchmark
         run: ./gradlew :benchmarks:jvmBenchmark
 
-      - name: Run Node JS benchmark
-        run: ./gradlew :benchmarks:jsBenchmark
+  benchmark-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version-file: .ci-java-version
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
 
       - name: Run Native Linux benchmark
         run: ./gradlew :benchmarks:linuxX64Benchmark
+
+  benchmark-node-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version-file: .ci-java-version
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+
+      - name: Run Node JS benchmark
+        run: ./gradlew :benchmarks:jsBenchmark
 
   benchmark-mac:
     runs-on: macos-latest

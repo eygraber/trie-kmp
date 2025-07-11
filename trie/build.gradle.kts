@@ -10,9 +10,13 @@ android {
 }
 
 kotlin {
-  allKmpTargets(project)
+  defaultKmpTargets(project)
 
   sourceSets {
+    commonMain.dependencies {
+      implementation(libs.androidx.collections)
+    }
+
     commonTest.dependencies {
       implementation(projects.utils)
 
