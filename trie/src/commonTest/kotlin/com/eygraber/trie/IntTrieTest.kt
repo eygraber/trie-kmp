@@ -7,7 +7,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 abstract class IntTrieTest {
-  abstract fun <V> createTrie(vararg pairs: Pair<List<Int>, V>): MutableTrie<Int, V>
+  abstract fun <V> createTrie(vararg pairs: Pair<List<Int>, V>): MutableGenericTrie<Int, V>
 
   @Test
   fun testPutAndGetWithIntKeys() {
@@ -69,11 +69,13 @@ abstract class IntTrieTest {
 }
 
 class CompactIntTrieTest : IntTrieTest() {
-  override fun <V> createTrie(vararg pairs: Pair<List<Int>, V>): MutableTrie<Int, V> =
-    mutableGenericCompactTrieOf(*pairs)
+  override fun <V> createTrie(
+    vararg pairs: Pair<List<Int>, V>,
+  ): MutableGenericTrie<Int, V> = mutableCompactGenericTrieOf(*pairs)
 }
 
-class MapIntTrieTest : IntTrieTest() {
-  override fun <V> createTrie(vararg pairs: Pair<List<Int>, V>): MutableTrie<Int, V> =
-    mutableGenericTrieOf(*pairs)
+class StandardIntTrieTest : IntTrieTest() {
+  override fun <V> createTrie(
+    vararg pairs: Pair<List<Int>, V>,
+  ): MutableGenericTrie<Int, V> = mutableGenericTrieOf(*pairs)
 }

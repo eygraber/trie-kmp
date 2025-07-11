@@ -1,11 +1,13 @@
 # Trie KMP
 
-trie-kmp is a lightweight, efficient, and idiomatic library providing Trie data structures for Kotlin Multiplatform
+trie-kmp is a lightweight, efficient, and idiomatic library providing Trie data structures for Kotlin Multiplatform.
 
-The library offers two primary implementations:
+The library offers several primary implementations tailored for different needs:
 
- - `CompactTrie`: A memory-efficient Trie that compresses non-branching paths.
- - `MapTrie`: A classic, standard Trie.
+ - `CompactGenericTrie`: A memory-efficient Trie that compresses non-branching paths.
+ - `CompactStringTrie`: Similar to `CompactGenericTrie` but optimized for `String` keys. 
+ - `StandardGenericTrie`: A classic, standard Trie.
+ - `StandardStringTrie`: Similar to `StandardGenericTrie` but optimized for `String` keys.
 
 This allows developers to choose the optimal data structure for their specific use case, whether it's for
 autocomplete systems, spell checkers, IP routing tables, or any other prefix-based application.
@@ -26,31 +28,77 @@ Snapshots can be found [here](https://central.sonatype.org/publish/publish-porta
 
 ### Usage
 
-#### Creating a Trie
+#### Recommended Usage for String
 
-Use the `mutableTrieOf()` and `mutableCompactTrieOf()` builder functions for easy instantiation.
+For any `String`-based use case, use the optimized `compactTrieOf` / `mutableCompactTrieOf` builders.
 
 ```kotlin
-// Create a standard Trie
-val standardTrie = mutableTrieOf(
+// Create a high-performance, memory-efficient compact Trie for Strings
+val trie = mutableCompactTrieOf(
     "apple" to "A fruit",
-    "apply" to "To make a formal request",
+    "application" to "A formal request",
+    "apply" to "To make use of"
 )
 
-// Create a memory-efficient compact Trie
-val compactTrie = mutableCompactTrieOf(
-    "banana" to "A long yellow fruit",
+// The API is clean and direct
+trie["banana"] = "A long yellow fruit"
+val value = trie["apple"] // "A fruit"
+
+// Autocomplete is fast and efficient
+val suggestions = trie.getAllWithPrefix("app")
+// suggestions will be a Map of "apple", "application", "apply" to their values
+```
+
+#### Working with Generic Keys
+
+For non-`String` keys, use the optimized `compactGenericTrieOf` / `mutableCompactGenericTrieOf` builders.
+
+The key type `K` must have a correct `equals`/`hashCode` implementation.
+This is useful for cases like IP routing or bioinformatics.
+
+**Example 1: IP Routing**
+
+```kotlin
+// Using a list of integers as a key for IP routing
+val ipRouteTrie = compactGenericTrieOf(
+  listOf(10, 8, 0, 0) to "Local Network A",
+  listOf(10, 8, 1, 0) to "Local Network B",
 )
+
+// Find all routes under the 10.8.0.0/16 prefix
+val localRoutes = ipRouteTrie.getAllWithPrefix(listOf(10, 8))
+
+// localRoutes will contain both "Local Network A" and "Local Network B"
+```
+
+**Example 2: Bioinformatics**
+
+```kotlin
+// Define a custom data class for DNA segments
+data class DnaSegment(val base: Char)
+
+// Create a Trie to store gene sequences
+val geneTrie = compactGenericTrieOf(
+  listOf(DnaSegment('A'), DnaSegment('T'), DnaSegment('G')) to "Gene for Eye Color",
+  listOf(DnaSegment('A'), DnaSegment('T'), DnaSegment('C')) to "Gene for Height",
+)
+
+// Find all genes that start with the sequence A -> T
+val atPrefixGenes = geneTrie.getAllWithPrefix(
+    listOf(DnaSegment('A'), DnaSegment('T')),
+)
+
+// atPrefixGenes will contain both "Gene for Eye Color" and "Gene for Height"
 ```
 
 #### Basic Map Operations
 
-Since both Tries implement `MutableMap`, you can use all the standard map functions.
+Since `Trie` implements `Map` (and `MutableTrie` implements `MutableMap`), you can use all the standard map functions.
 
 ```kotlin
-val trie = mutableCompactTrieOf<String>()
+val trie = mutableCompactTrieOf()
 
-// Add a value (using the String extension)
+// Add a value
 trie["hello"] = "A greeting"
 trie["world"] = "The earth"
 
@@ -59,6 +107,13 @@ val greeting = trie["hello"] // "A greeting"
 
 // Check for keys
 println("world" in trie) // true
+
+trie.remove("world") // "The earth"
+
+trie.containsValue("foo") // false
+
+trie.keys // ["hello", "world"]
+trie.values // ["A greeting", "The earth"]
 ```
 
 #### Prefix Searching (Autocomplete)
@@ -78,81 +133,44 @@ val suggestions =
   trie
     .getAllWithPrefix("tea")
     .keys
-    .map { it.joinToString("") } // Convert List<Char> back to String
 
 // suggestions will contain: ["tea", "team", "teammate"]
 ```
 
-#### Working with Generic Keys
+#### Choosing an Implementation
 
-While `String` keys are common, the library is fully generic. You can use a `List<E>` as a key, as long as `E` has
-a correct `equals`/`hashCode` implementation. This is useful for cases like IP routing or bioinformatics.
-
-**Use Case 1: IP Routing**
-
-```kotlin
-// Using a list of integers as a key for IP routing
-val ipRouteTrie = genericCompactTrieOf(
-  listOf(10, 8, 0, 0) to "Local Network A",
-  listOf(10, 8, 1, 0) to "Local Network B",
-)
-
-// Find all routes under the 10.8.0.0/16 prefix
-val localRoutes = ipRouteTrie.getAllWithPrefix(listOf(10, 8))
-
-// localRoutes will contain both "Local Network A" and "Local Network B"
-```
-
-**Use Case 2: Bioinformatics**
-
-```kotlin
-// Define a custom data class for DNA segments
-data class DnaSegment(val base: Char)
-
-// Create a Trie to store gene sequences
-val geneTrie = genericCompactTrieOf(
-  listOf(DnaSegment('A'), DnaSegment('T'), DnaSegment('G')) to "Gene for Eye Color",
-  listOf(DnaSegment('A'), DnaSegment('T'), DnaSegment('C')) to "Gene for Height",
-)
-
-// Find all genes that start with the sequence A -> T
-val atPrefixGenes = geneTrie.getAllWithPrefix(
-    listOf(DnaSegment('A'), DnaSegment('T')),
-)
-
-// atPrefixGenes will contain both "Gene for Eye Color" and "Gene for Height"
-
-```
-
-#### Choosing an Implementation: `MapTrie` vs. `CompactTrie`
-
-The library provides two implementations with different performance characteristics.
+The library provides multiple implementations with different performance characteristics.
 The best choice depends on your specific workload.
 
-| Benchmark                            | MapTrie (`mutableTrieOf`) | CompactTrie (`mutableCompactTrieOf`) | Winner                       | 
-|:-------------------------------------|:--------------------------|:-------------------------------------|:-----------------------------| 
-| **Prefix Search / Autocomplete**     | ~0.14 ms/op               | ~0.18 ms/op                          | **Map Trie** (Slightly)      | 
-| **Individual Lookups (Spell Check)** | **~11.7 ms/op**           | ~18.0 ms/op                          | **Map Trie**                 | 
-| **String Creation Time**             | ~23.4 ms/op               | **~18.5 ms/op**                      | **Compact Trie**             |
-| **Basic String Prefix Search**       | ~0.258 ms/op              | **~0.249 ms/op**                     | **Compact Trie**  (Slightly) |
-| **Object Creation Time**             | ~30.787 ms/op             | **~48.204 ms/op**                    | **Map Trie**                 |
-| **Basic Object Prefix Search**       | ~0.642 ms/op              | **~.637 ms/op**                      | **Compact Trie**  (Slightly) |
-| **Memory Usage (Node Count)**        | High                      | **Low**                              | **Compact Trie**             |
+##### For `String` Keys
+
+| Benchmark                            | StandardStringTrie (`trieOf`) | CompactStringTrie (`compactTrieOf`) | Winner                             | 
+|:-------------------------------------|:------------------------------|:------------------------------------|:-----------------------------------| 
+| **Creation Time**                    | ~11.8 ms/op                   | **~5.1 ms/op**                      | **CompactStringTrie**              | 
+| **Prefix Search / Autocomplete**     | ~0.21 ms/op                   | **~0.09 ms/op**                     | **CompactStringTrie**              | 
+| **Individual Lookups (Spell Check)** | **~5.6 ms/op**                | ~7.0 ms/op                          | **StandardStringTrie**             |
+| **Removal**                          | **~0.04 ms/op**               | ~0.05 ms/op                         | **StandardStringTrie**  (Slightly) |
+| **Memory Usage (Node Count)**        | High                          | **Low**                             | **CompactStringTrie**              |
+
+##### For Generic Keys (e.g. `List<Int>`)
+
+| Benchmark                     | StandardGenericTrie (`genericTrieOf`) | CompactGenericTrie (`compactGenericTrieOf`) | Winner                  | 
+|:------------------------------|:--------------------------------------|:--------------------------------------------|:------------------------| 
+| **Creation Time**             | **~23.4 ms/op**                       | ~37.3 ms/op                                 | **StandardGenericTrie** | 
+| **Prefix Search**             | ~0.58 ms/op                           | **~0.49 ms/op**                             | **CompactGenericTrie**  | 
+| **Removal**                   | **~0.16 ms/op**                       | ~0.58 ms/op                                 | **StandardGenericTrie** |
+| **Memory Usage (Node Count)** | High                                  | **Low**                                     | **CompactGenericTrie**  |
 
 #### Recommendations
 
- - Use `CompactTrie` when:
-     - **Memory efficiency is your top priority**. This is the biggest advantage of the compact implementation. 
-        It uses significantly fewer nodes, making it ideal for very large datasets or environments with memory constraints.
-     - Your keys have long, shared prefixes (like URLs, file paths, or package names).
-     - Creation time for large sets of `String` keys is important.
- - Use `MapTrie` when:
-     - **Your primary workload consists of a massive number of individual key lookups** (`get`, `containsKey`).
-       The simpler logic of the standard Trie makes its per-operation cost lower, which adds up in lookup-heavy 
-       algorithms like the spell-check benchmark.
-     - You can afford the higher memory usage.
-     - You prefer a simpler, more readable implementation for easier debugging or educational purposes.
-
-**General Guideline**: For most common use cases like **autocomplete**, the performance is very close. Start with
-`CompactTrie` for its superior memory profile. Only switch to the `MapTrie` if benchmarks of your specific application
-show that you are bottlenecked by a very high volume of individual `get`/`containsKey` calls.
+ - **For `String` keys, always use the specialized implementation.** They are dramatically faster than the generic
+   `List<Char>` versions.
+ - **Use `CompactStringTrie` as your default choice for `String` keys.** It is significantly faster at creation and 
+   prefix searches (the most common Trie operations) and is vastly more memory-efficient. The very slight performance
+   loss in individual lookups is a small price to pay for the huge gains elsewhere.
+ - **Use `StandardStringTrie` only in very specific, benchmarked scenarios.** If your application almost exclusively
+   performs `remove` or individual `get` / `containsKey` operations, and does very few prefix searches or insertions,
+   it might be marginally faster.
+ - **For generic keys (e.g. `List<Int>`), the trade-offs are clearer.**
+   - Choose `StandardGenericTrie` if your workload is heavy on **creation and removal**.
+   - Choose `CompactGenericTrie` if **memory usage and prefix search performance** are your main concerns.

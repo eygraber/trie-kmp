@@ -1,19 +1,19 @@
 package com.eygraber.trie
 
-import com.eygraber.trie.utils.SpellChecker
+import com.eygraber.trie.utils.CharSpellChecker
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-abstract class AbstractSpellCheckTest {
-  abstract fun createDictionary(words: List<String>): Trie<Char, Boolean>
+abstract class SpellCheckStringTrieTest {
+  abstract fun createDictionary(words: List<String>): GenericTrie<Char, Boolean>
 
   @Test
   fun `it suggests correct words for a misspelling`() {
     val dictionaryWords = listOf("apple", "apply", "angle", "banana", "people")
     val dictionary = createDictionary(dictionaryWords)
 
-    val spellChecker = SpellChecker(dictionary)
+    val spellChecker = CharSpellChecker(dictionary)
 
     val suggestions = spellChecker.suggest("aple")
 
@@ -25,7 +25,7 @@ abstract class AbstractSpellCheckTest {
     val dictionaryWords = listOf("cat", "dog", "fish")
     val dictionary = createDictionary(dictionaryWords)
 
-    val spellChecker = SpellChecker(dictionary)
+    val spellChecker = CharSpellChecker(dictionary)
 
     val suggestions = spellChecker.suggest("xyz")
 
@@ -33,14 +33,14 @@ abstract class AbstractSpellCheckTest {
   }
 }
 
-class MapSpellCheckTest : AbstractSpellCheckTest() {
+class StandardSpellCheckStringTrieTest : SpellCheckStringTrieTest() {
   override fun createDictionary(
     words: List<String>,
-  ): Trie<Char, Boolean> = mutableTrieOf(*words.map { it to true }.toTypedArray())
+  ): GenericTrie<Char, Boolean> = genericTrieOfString(*words.map { it to true }.toTypedArray())
 }
 
-class CompactSpellCheckTest : AbstractSpellCheckTest() {
+class CompactSpellCheckStringTrieTest : SpellCheckStringTrieTest() {
   override fun createDictionary(
     words: List<String>,
-  ): Trie<Char, Boolean> = mutableCompactTrieOf(*words.map { it to true }.toTypedArray())
+  ): GenericTrie<Char, Boolean> = compactGenericTrieOfString(*words.map { it to true }.toTypedArray())
 }

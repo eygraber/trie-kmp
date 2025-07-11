@@ -2,7 +2,8 @@ package com.eygraber.trie.benchmark
 
 import com.eygraber.trie.mutableCompactTrieOf
 import com.eygraber.trie.mutableTrieOf
-import com.eygraber.trie.utils.SpellChecker
+import com.eygraber.trie.utils.CharSpellChecker
+import com.eygraber.trie.utils.StringSpellChecker
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
 import kotlinx.benchmark.BenchmarkTimeUnit
@@ -28,8 +29,12 @@ class SpellCheckBenchmarks {
   private val wordsToCheckCount = 200
 
   private lateinit var wordsToCorrect: List<String>
-  private lateinit var standardTrieSpellChecker: SpellChecker
-  private lateinit var compactTrieSpellChecker: SpellChecker
+
+  private lateinit var compactStringTrieSpellChecker: StringSpellChecker
+  private lateinit var standardStringTrieSpellChecker: StringSpellChecker
+
+  private lateinit var compactGenericTrieSpellChecker: CharSpellChecker
+  private lateinit var standardGenericTrieSpellChecker: CharSpellChecker
 
   @Setup
   fun setup() {
@@ -38,11 +43,27 @@ class SpellCheckBenchmarks {
       (1..wordLength).map { charPool.random(random) }.joinToString("")
     }.toSet() // Use a set to ensure unique words
 
-    val standardDictionary = mutableTrieOf(*dictionaryWords.map { it to true }.toTypedArray())
-    val compactDictionary = mutableCompactTrieOf(*dictionaryWords.map { it to true }.toTypedArray())
+    val standardStringDictionary = mutableTrieOf(
+      *dictionaryWords.map { it to true }.toTypedArray(),
+    )
 
-    standardTrieSpellChecker = SpellChecker(standardDictionary)
-    compactTrieSpellChecker = SpellChecker(compactDictionary)
+    val compactStringDictionary = mutableCompactTrieOf(
+      *dictionaryWords.map { it to true }.toTypedArray(),
+    )
+
+    val standardGenericDictionary = mutableGenericTrieOfString(
+      *dictionaryWords.map { it to true }.toTypedArray(),
+    )
+
+    val compactGenericDictionary = mutableCompactGenericTrieOfString(
+      *dictionaryWords.map { it to true }.toTypedArray(),
+    )
+
+    compactStringTrieSpellChecker = StringSpellChecker(compactStringDictionary)
+    standardStringTrieSpellChecker = StringSpellChecker(standardStringDictionary)
+
+    compactGenericTrieSpellChecker = CharSpellChecker(compactGenericDictionary)
+    standardGenericTrieSpellChecker = CharSpellChecker(standardGenericDictionary)
 
     wordsToCorrect = List(wordsToCheckCount) {
       val originalWord = dictionaryWords.random(random)
@@ -58,16 +79,30 @@ class SpellCheckBenchmarks {
   }
 
   @Benchmark
-  fun spellCheckTrie(blackhole: Blackhole) {
+  fun spellCheckCompactStringTrie(blackhole: Blackhole) {
     for(word in wordsToCorrect) {
-      blackhole.consume(standardTrieSpellChecker.suggest(word))
+      blackhole.consume(compactStringTrieSpellChecker.suggest(word))
     }
   }
 
   @Benchmark
-  fun spellCheckCompactTrie(blackhole: Blackhole) {
+  fun spellCheckCompactGenericTrie(blackhole: Blackhole) {
     for(word in wordsToCorrect) {
-      blackhole.consume(compactTrieSpellChecker.suggest(word))
+      blackhole.consume(compactGenericTrieSpellChecker.suggest(word))
+    }
+  }
+
+  @Benchmark
+  fun spellCheckStandardStringTrie(blackhole: Blackhole) {
+    for(word in wordsToCorrect) {
+      blackhole.consume(standardStringTrieSpellChecker.suggest(word))
+    }
+  }
+
+  @Benchmark
+  fun spellCheckStandardGenericTrie(blackhole: Blackhole) {
+    for(word in wordsToCorrect) {
+      blackhole.consume(standardGenericTrieSpellChecker.suggest(word))
     }
   }
 }

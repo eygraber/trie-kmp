@@ -9,13 +9,13 @@ import kotlin.test.assertTrue
 data class DnaSegment(val value: Char)
 
 @Suppress("PrivatePropertyName")
-abstract class CustomTrieTest {
+abstract class GenericTrieTest {
   private val A = DnaSegment('A')
   private val C = DnaSegment('C')
   private val G = DnaSegment('G')
   private val T = DnaSegment('T')
 
-  abstract fun <V> createTrie(vararg pairs: Pair<List<DnaSegment>, V>): MutableTrie<DnaSegment, V>
+  abstract fun <V> createTrie(vararg pairs: Pair<List<DnaSegment>, V>): MutableGenericTrie<DnaSegment, V>
 
   @Test
   fun testPutAndGetWithCustomKeys() {
@@ -76,12 +76,14 @@ abstract class CustomTrieTest {
   }
 }
 
-class CompactCustomTrieTest : CustomTrieTest() {
-  override fun <V> createTrie(vararg pairs: Pair<List<DnaSegment>, V>): MutableTrie<DnaSegment, V> =
-    mutableGenericCompactTrieOf(*pairs)
+class CompactGenericTrieTest : GenericTrieTest() {
+  override fun <V> createTrie(
+    vararg pairs: Pair<List<DnaSegment>, V>,
+  ): MutableGenericTrie<DnaSegment, V> = mutableCompactGenericTrieOf(*pairs)
 }
 
-class MapCustomTrieTest : CustomTrieTest() {
-  override fun <V> createTrie(vararg pairs: Pair<List<DnaSegment>, V>): MutableTrie<DnaSegment, V> =
-    mutableGenericTrieOf(*pairs)
+class StandardGenericTrieTest : GenericTrieTest() {
+  override fun <V> createTrie(
+    vararg pairs: Pair<List<DnaSegment>, V>,
+  ): MutableGenericTrie<DnaSegment, V> = mutableGenericTrieOf(*pairs)
 }

@@ -2,7 +2,8 @@ package com.eygraber.trie.benchmark
 
 import com.eygraber.trie.mutableCompactTrieOf
 import com.eygraber.trie.mutableTrieOf
-import com.eygraber.trie.utils.AutoComplete
+import com.eygraber.trie.utils.CharAutoComplete
+import com.eygraber.trie.utils.StringAutoComplete
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
 import kotlinx.benchmark.BenchmarkTimeUnit
@@ -28,8 +29,12 @@ class AutoCompleteBenchmarks {
   private val prefixesToCompleteCount = 500
 
   private lateinit var prefixesToComplete: List<String>
-  private lateinit var standardTrieAutoComplete: AutoComplete<Boolean>
-  private lateinit var compactTrieAutoComplete: AutoComplete<Boolean>
+
+  private lateinit var compactStringTrieAutoComplete: StringAutoComplete<Boolean>
+  private lateinit var standardStringTrieAutoComplete: StringAutoComplete<Boolean>
+
+  private lateinit var compactGenericTrieAutoComplete: CharAutoComplete<Boolean>
+  private lateinit var standardGenericTrieAutoComplete: CharAutoComplete<Boolean>
 
   @Setup
   fun setup() {
@@ -38,11 +43,27 @@ class AutoCompleteBenchmarks {
       (1..wordLength).map { charPool.random(random) }.joinToString("")
     }.toSet()
 
-    val standardDictionary = mutableTrieOf(*dictionaryWords.map { it to true }.toTypedArray())
-    val compactDictionary = mutableCompactTrieOf(*dictionaryWords.map { it to true }.toTypedArray())
+    val standardStringDictionary = mutableTrieOf(
+      *dictionaryWords.map { it to true }.toTypedArray(),
+    )
 
-    standardTrieAutoComplete = AutoComplete(standardDictionary)
-    compactTrieAutoComplete = AutoComplete(compactDictionary)
+    val compactStringDictionary = mutableCompactTrieOf(
+      *dictionaryWords.map { it to true }.toTypedArray(),
+    )
+
+    val standardGenericDictionary = mutableGenericTrieOfString(
+      *dictionaryWords.map { it to true }.toTypedArray(),
+    )
+
+    val compactGenericDictionary = mutableCompactGenericTrieOfString(
+      *dictionaryWords.map { it to true }.toTypedArray(),
+    )
+
+    compactStringTrieAutoComplete = StringAutoComplete(compactStringDictionary)
+    standardStringTrieAutoComplete = StringAutoComplete(standardStringDictionary)
+
+    compactGenericTrieAutoComplete = CharAutoComplete(compactGenericDictionary)
+    standardGenericTrieAutoComplete = CharAutoComplete(standardGenericDictionary)
 
     prefixesToComplete = List(prefixesToCompleteCount) {
       val word = dictionaryWords.random(random)
@@ -51,16 +72,30 @@ class AutoCompleteBenchmarks {
   }
 
   @Benchmark
-  fun autoCompleteTrie(blackhole: Blackhole) {
+  fun autoCompleteCompactStringTrie(blackhole: Blackhole) {
     for(prefix in prefixesToComplete) {
-      blackhole.consume(standardTrieAutoComplete.suggest(prefix))
+      blackhole.consume(compactStringTrieAutoComplete.suggest(prefix))
     }
   }
 
   @Benchmark
-  fun autoCompleteCompactTrie(blackhole: Blackhole) {
+  fun autoCompleteCompactGenericTrie(blackhole: Blackhole) {
     for(prefix in prefixesToComplete) {
-      blackhole.consume(compactTrieAutoComplete.suggest(prefix))
+      blackhole.consume(compactGenericTrieAutoComplete.suggest(prefix))
+    }
+  }
+
+  @Benchmark
+  fun autoCompleteStandardStringTrie(blackhole: Blackhole) {
+    for(prefix in prefixesToComplete) {
+      blackhole.consume(standardStringTrieAutoComplete.suggest(prefix))
+    }
+  }
+
+  @Benchmark
+  fun autoCompleteStandardGenericTrie(blackhole: Blackhole) {
+    for(prefix in prefixesToComplete) {
+      blackhole.consume(standardGenericTrieAutoComplete.suggest(prefix))
     }
   }
 }

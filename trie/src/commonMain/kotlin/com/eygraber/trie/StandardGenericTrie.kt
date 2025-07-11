@@ -3,22 +3,24 @@ package com.eygraber.trie
 /**
  * A concrete implementation of a mutable, map-like Trie.
  *
- * @param E The type of the elements in the key sequences.
+ * @param K The type of the elements in the key sequences.
  * @param V The type of the values.
  */
-public class MapTrie<E, V> : AbstractTrie<E, V>() {
-  private val root = MapTrieNode<E, V>()
+public class StandardGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<List<K>, V>() {
+  private val root = StandardTrieNode<K, V>()
   private var internalSize = 0
 
   override val size: Int get() = internalSize
 
-  override val entries: MutableSet<MutableMap.MutableEntry<List<E>, V>>
-    get() = object : AbstractMutableSet<MutableMap.MutableEntry<List<E>, V>>() {
-      override val size: Int get() = this@MapTrie.size
-      override fun iterator(): MutableIterator<MutableMap.MutableEntry<List<E>, V>> {
-        val allEntries = mutableListOf<MutableMap.MutableEntry<List<E>, V>>()
-        val path = mutableListOf<E>()
-        fun collectAll(node: MapTrieNode<E, V>) {
+  override val entries: MutableSet<MutableMap.MutableEntry<List<K>, V>>
+    get() = object : AbstractMutableSet<MutableMap.MutableEntry<List<K>, V>>() {
+      override val size: Int get() = this@StandardGenericTrie.size
+
+      override fun iterator(): MutableIterator<MutableMap.MutableEntry<List<K>, V>> {
+        val allEntries = mutableListOf<MutableMap.MutableEntry<List<K>, V>>()
+        val path = mutableListOf<K>()
+
+        fun collectAll(node: StandardTrieNode<K, V>) {
           node.value?.let { allEntries.add(TrieEntry(path.toList(), it)) }
           node.children.forEach { (elem, child) ->
             path.add(elem)
@@ -26,14 +28,15 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
             path.removeAt(path.lastIndex)
           }
         }
+
         collectAll(root)
 
         val backingIterator = allEntries.iterator()
-        var lastEntry: MutableMap.MutableEntry<List<E>, V>? = null
+        var lastEntry: MutableMap.MutableEntry<List<K>, V>? = null
 
-        return object : MutableIterator<MutableMap.MutableEntry<List<E>, V>> {
+        return object : MutableIterator<MutableMap.MutableEntry<List<K>, V>> {
           override fun hasNext(): Boolean = backingIterator.hasNext()
-          override fun next(): MutableMap.MutableEntry<List<E>, V> {
+          override fun next(): MutableMap.MutableEntry<List<K>, V> {
             val entry = backingIterator.next()
             lastEntry = entry
             return entry
@@ -41,21 +44,21 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
 
           override fun remove() {
             checkNotNull(lastEntry)
-            this@MapTrie.remove(lastEntry.key)
+            this@StandardGenericTrie.remove(lastEntry.key)
             backingIterator.remove()
           }
         }
       }
 
-      override fun add(element: MutableMap.MutableEntry<List<E>, V>): Boolean = throw UnsupportedOperationException()
+      override fun add(element: MutableMap.MutableEntry<List<K>, V>): Boolean = throw UnsupportedOperationException()
     }
 
-  override fun get(key: List<E>): V? = findNode(key)?.value
+  override fun get(key: List<K>): V? = findNode(key)?.value
 
-  override fun put(key: List<E>, value: V): V? {
+  override fun put(key: List<K>, value: V): V? {
     var currentNode = root
     for(element in key) {
-      currentNode = currentNode.children.getOrPut(element) { MapTrieNode() }
+      currentNode = currentNode.children.getOrPut(element) { StandardTrieNode() }
     }
 
     val oldValue = currentNode.value
@@ -68,7 +71,7 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   @Suppress("ReturnCount")
-  override fun remove(key: List<E>): V? {
+  override fun remove(key: List<K>): V? {
     if(key.isEmpty()) {
       val oldValue = root.value
       if(oldValue != null) {
@@ -79,9 +82,9 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
     }
 
     // 1. Find the node and collect the path
-    val path = mutableListOf<MapTrieNode<E, V>>()
+    val path = mutableListOf<StandardTrieNode<K, V>>()
     path.add(root)
-    var currentNode: MapTrieNode<E, V>? = root
+    var currentNode: StandardTrieNode<K, V>? = root
     for(element in key) {
       currentNode = currentNode?.children?.get(element)
       if(currentNode == null) {
@@ -121,12 +124,12 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
     internalSize = 0
   }
 
-  override fun startsWith(prefix: List<E>): Boolean = findNode(prefix) != null
+  override fun startsWith(prefix: List<K>): Boolean = findNode(prefix) != null
 
-  override fun getAllWithPrefix(prefix: List<E>): Map<List<E>, V> {
+  override fun getAllWithPrefix(prefix: List<K>): Map<List<K>, V> {
     val prefixNode = findNode(prefix) ?: return emptyMap()
 
-    val result = mutableMapOf<List<E>, V>()
+    val result = mutableMapOf<List<K>, V>()
     val path = prefix.toMutableList()
 
     // If the prefix itself is a key, add it.
@@ -138,7 +141,7 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
     return result
   }
 
-  override fun getAllValuesWithPrefix(prefix: List<E>): Collection<V> {
+  override fun getAllValuesWithPrefix(prefix: List<K>): Collection<V> {
     val prefixNode = findNode(prefix) ?: return emptyList()
     val result = mutableListOf<V>()
     // If the prefix itself is a key, add its value.
@@ -149,7 +152,7 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
     return result
   }
 
-  private fun findNode(key: List<E>): MapTrieNode<E, V>? {
+  private fun findNode(key: List<K>): StandardTrieNode<K, V>? {
     var currentNode = root
     for(element in key) {
       currentNode = currentNode.children[element] ?: return null
@@ -158,9 +161,9 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   private fun findAllFromNode(
-    node: MapTrieNode<E, V>,
-    path: MutableList<E>,
-    result: MutableMap<List<E>, V>,
+    node: StandardTrieNode<K, V>,
+    path: MutableList<K>,
+    result: MutableMap<List<K>, V>,
   ) {
     for((element, childNode) in node.children) {
       path.add(element)
@@ -173,7 +176,7 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
   }
 
   private fun findAllValuesFromNode(
-    node: MapTrieNode<E, V>,
+    node: StandardTrieNode<K, V>,
     result: MutableList<V>,
   ) {
     for((_, childNode) in node.children) {
@@ -182,44 +185,5 @@ public class MapTrie<E, V> : AbstractTrie<E, V>() {
       }
       findAllValuesFromNode(childNode, result)
     }
-  }
-}
-
-/**
- * Represents a node in the Trie data structure, mapping sequence elements to values.
- *
- * @param E The type of element in the key sequence.
- * @param V The type of value stored in the Trie.
- */
-private class MapTrieNode<E, V> {
-  /**
-   * A map where keys are sequence elements and values are the corresponding child TrieNodes.
-   */
-  val children: MutableMap<E, MapTrieNode<E, V>> = mutableMapOf()
-
-  /**
-   * The value associated with the key that ends at this node.
-   * If null, this node is not the end of a complete key.
-   */
-  var value: V? = null
-
-  override fun toString(): String = "$value=$children"
-
-  override fun equals(other: Any?): Boolean {
-    if(this === other) return true
-    if(other == null || this::class != other::class) return false
-
-    other as MapTrieNode<*, *>
-
-    if(children != other.children) return false
-    if(value != other.value) return false
-
-    return true
-  }
-
-  override fun hashCode(): Int {
-    var result = children.hashCode()
-    result = 31 * result + (value?.hashCode() ?: 0)
-    return result
   }
 }

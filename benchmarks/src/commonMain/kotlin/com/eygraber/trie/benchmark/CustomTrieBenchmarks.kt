@@ -1,7 +1,7 @@
 package com.eygraber.trie.benchmark
 
-import com.eygraber.trie.Trie
-import com.eygraber.trie.mutableGenericCompactTrieOf
+import com.eygraber.trie.MutableGenericTrie
+import com.eygraber.trie.mutableCompactGenericTrieOf
 import com.eygraber.trie.mutableGenericTrieOf
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
@@ -38,11 +38,10 @@ class TrieCustomBenchmarks {
 
   private lateinit var dataset: List<Pair<List<DnaSegment>, Int>>
   private lateinit var prefixes: List<List<DnaSegment>>
+  private lateinit var removals: List<List<DnaSegment>>
 
-  private lateinit var trie: Trie<DnaSegment, Int>
-  private lateinit var compactTrie: Trie<DnaSegment, Int>
-  private lateinit var hashMap: Map<List<DnaSegment>, Int>
-  private lateinit var list: List<Pair<List<DnaSegment>, Int>>
+  private lateinit var compactTrie: MutableGenericTrie<DnaSegment, Int>
+  private lateinit var standardTrie: MutableGenericTrie<DnaSegment, Int>
 
   @Setup
   fun setup() {
@@ -53,38 +52,31 @@ class TrieCustomBenchmarks {
       randomGene to index
     }
 
-    trie = mutableGenericTrieOf(*dataset.toTypedArray())
-    compactTrie = mutableGenericCompactTrieOf(*dataset.toTypedArray())
-    hashMap = dataset.toMap()
-    list = dataset
+    standardTrie = mutableGenericTrieOf(*dataset.toTypedArray())
+    compactTrie = mutableCompactGenericTrieOf(*dataset.toTypedArray())
 
     prefixes = List(1000) {
       val gene = dataset[random.nextInt(0, datasetSize)].first
       gene.subList(0, gene.size / 2)
     }
+
+    removals = List(1000) {
+      dataset[random.nextInt(0, datasetSize)].first
+    }
   }
 
   @Benchmark
-  fun customTrieCreation(blackhole: Blackhole) {
+  fun compactGenericTrieCreation(blackhole: Blackhole) {
+    blackhole.consume(mutableCompactGenericTrieOf(*dataset.toTypedArray()))
+  }
+
+  @Benchmark
+  fun standardGenericTrieCreation(blackhole: Blackhole) {
     blackhole.consume(mutableGenericTrieOf(*dataset.toTypedArray()))
   }
 
   @Benchmark
-  fun customCompactTrieCreation(blackhole: Blackhole) {
-    blackhole.consume(mutableGenericCompactTrieOf(*dataset.toTypedArray()))
-  }
-
-  @Benchmark
-  fun customTriePrefixSearch(): List<Int> {
-    val results = mutableListOf<Int>()
-    for(prefix in prefixes) {
-      results.addAll(trie.getAllValuesWithPrefix(prefix))
-    }
-    return results
-  }
-
-  @Benchmark
-  fun customCompactTriePrefixSearch(): List<Int> {
+  fun compactGenericTriePrefixSearch(): List<Int> {
     val results = mutableListOf<Int>()
     for(prefix in prefixes) {
       results.addAll(compactTrie.getAllValuesWithPrefix(prefix))
@@ -93,26 +85,25 @@ class TrieCustomBenchmarks {
   }
 
   @Benchmark
-  fun customHashMapLinearScan(): List<Int> {
+  fun standardGenericTriePrefixSearch(): List<Int> {
     val results = mutableListOf<Int>()
     for(prefix in prefixes) {
-      val values = hashMap.keys
-        .filter { it.size >= prefix.size && it.subList(0, prefix.size) == prefix }
-        .mapNotNull { hashMap[it] }
-      results.addAll(values)
+      results.addAll(standardTrie.getAllValuesWithPrefix(prefix))
     }
     return results
   }
 
   @Benchmark
-  fun customListLinearScan(): List<Int> {
-    val results = mutableListOf<Int>()
-    for(prefix in prefixes) {
-      val values = list
-        .filter { it.first.size >= prefix.size && it.first.subList(0, prefix.size) == prefix }
-        .map { it.second }
-      results.addAll(values)
+  fun compactGenericTrieRemoval(blackhole: Blackhole) {
+    for(removal in removals) {
+      blackhole.consume(compactTrie.remove(removal))
     }
-    return results
+  }
+
+  @Benchmark
+  fun standardGenericTrieRemoval(blackhole: Blackhole) {
+    for(removal in removals) {
+      blackhole.consume(standardTrie.remove(removal))
+    }
   }
 }
