@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.eygraber:trie-kmp:0.0.2")
+  implementation("com.eygraber:trie-kmp:0.0.3")
 }
 ```
 
