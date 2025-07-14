@@ -146,22 +146,22 @@ The best choice depends on your specific workload.
 
 | Benchmark                            | StandardStringTrie (`trieOf`) | CompactStringTrie (`compactTrieOf`) | Winner                            |
 |:-------------------------------------|:------------------------------|:------------------------------------|:----------------------------------|
-| **Creation Time**                    | ~13.3 ms/op                   | **~5.5 ms/op**                      | **CompactStringTrie**             |
-| **Prefix Search**                    | ~0.15 ms/op                   | **~0.08 ms/op**                     | **CompactStringTrie**             |
-| **Autocomplete**                     | ~0.07 ms/op                   | **~0.05 ms/op**                     | **CompactStringTrie**             |
-| **Individual Lookups (Spell Check)** | **~7.2 ms/op**                | ~7.3 ms/op                          | **StandardStringTrie** (Slightly) |
-| **Removal**                          | ~0.09 ms/op                   | **~0.05 ms/op**                     | **CompactStringTrie**             |
+| **Creation Time (1,000 items)**      | ~13.3 ms                      | **~5.5 ms**                         | **CompactStringTrie**             |
+| **Prefix Search**                    | ~0.15 µs/op                   | **~0.08 µs/op**                     | **CompactStringTrie**             |
+| **Autocomplete**                     | ~0.14 µs/op                   | **~0.1 µs/op**                      | **CompactStringTrie**             |
+| **Individual Lookups (Spell Check)** | **~36 µs/op**                 | ~36.5 µs/op                         | **StandardStringTrie** (Slightly) |
+| **Removal**                          | ~0.09 µs/op                   | **~0.05 µs/op**                     | **CompactStringTrie**             |
 | **Memory Usage (Node Count)**        | High                          | **Low**                             | **CompactStringTrie**             |
 
 ##### For Generic Keys (e.g. `List<Int>`)
 
 | Benchmark                            | StandardGenericTrie (`genericTrieOf`) | CompactGenericTrie (`compactGenericTrieOf`) | Winner                             |
 |:-------------------------------------|:--------------------------------------|:--------------------------------------------|:-----------------------------------|
-| **Creation Time**                    | **~16.67 ms/op**                      | ~22.2 ms/op                                 | **StandardGenericTrie**            |
-| **Prefix Search**                    | ~0.35 ms/op                           | **~0.20 ms/op**                             | **CompactGenericTrie**             |
-| **Autocomplete**                     | **~0.10 ms/op**                       | ~0.11 ms/op                                 | **StandardGenericTrie** (Slightly) |
-| **Individual Lookups (Spell Check)** | **~8.7 ms/op**                        | ~10.9 ms/op                                 | **StandardGenericTrie**            |
-| **Removal**                          | **~0.16 ms/op**                       | ~0.25 ms/op                                 | **StandardGenericTrie**            |
+| **Creation Time (1,000 items)**      | **~16.67 ms**                         | ~22.2 ms                                    | **StandardGenericTrie**            |
+| **Prefix Search**                    | ~0.35 µs/op                           | **~0.20 µs/op**                             | **CompactGenericTrie**             |
+| **Autocomplete**                     | **~0.2 µs/op**                        | ~0.22 µs/op                                 | **StandardGenericTrie** (Slightly) |
+| **Individual Lookups (Spell Check)** | **~43.5 µs/op**                       | ~54.5 µs/op                                 | **StandardGenericTrie**            |
+| **Removal**                          | **~0.16 µs/op**                       | ~0.25 µs/op                                 | **StandardGenericTrie**            |
 | **Memory Usage (Node Count)**        | High                                  | **Low**                                     | **CompactGenericTrie**             |
 
 #### Recommendations

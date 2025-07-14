@@ -44,6 +44,7 @@ jobs:
         run: ./gradlew :benchmarks:linuxX64Benchmark
 
   benchmark-node-js:
+    if: false # disabled because heap keeps running out of memory
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
