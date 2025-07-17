@@ -1,0 +1,124 @@
+package com.eygraber.trie.benchmark
+
+import com.eygraber.trie.MutableTrie
+import com.eygraber.trie.mutableCompactGenericTrieOf
+import com.eygraber.trie.mutableGenericTrieOf
+import kotlinx.benchmark.Benchmark
+import kotlinx.benchmark.BenchmarkMode
+import kotlinx.benchmark.BenchmarkTimeUnit
+import kotlinx.benchmark.Blackhole
+import kotlinx.benchmark.Measurement
+import kotlinx.benchmark.Mode
+import kotlinx.benchmark.OutputTimeUnit
+import kotlinx.benchmark.Scope
+import kotlinx.benchmark.Setup
+import kotlinx.benchmark.State
+import kotlinx.benchmark.Warmup
+
+@State(Scope.Benchmark)
+@Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Measurement(iterations = 20, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@OutputTimeUnit(BenchmarkTimeUnit.MICROSECONDS)
+@BenchmarkMode(Mode.AverageTime)
+class GenericBenchmarks {
+  private val dataset = BenchmarkData.GenericBased.realisticIntMix.toTypedArray()
+
+  private lateinit var compactTrie: MutableTrie<List<Int>, Int>
+  private lateinit var standardTrie: MutableTrie<List<Int>, Int>
+
+  @Setup
+  fun setup() {
+    compactTrie = mutableCompactGenericTrieOf(*dataset)
+    standardTrie = mutableGenericTrieOf(*dataset)
+  }
+
+  @Benchmark
+  fun creationCompact(blackhole: Blackhole) {
+    blackhole.consume(mutableCompactGenericTrieOf(*dataset))
+  }
+
+  @Benchmark
+  fun creationStandard(blackhole: Blackhole) {
+    blackhole.consume(mutableGenericTrieOf(*dataset))
+  }
+
+  @Benchmark
+  fun longSharedPrefixSearchCompact(blackhole: Blackhole) {
+    blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(10, 20, 30)))
+  }
+
+  @Benchmark
+  fun longSharedPrefixSearchStandard(blackhole: Blackhole) {
+    blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(10, 20, 30)))
+  }
+
+  @Benchmark
+  fun noSharedPrefixSearchCompact(blackhole: Blackhole) {
+    blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(2)))
+  }
+
+  @Benchmark
+  fun noSharedPrefixSearchStandard(blackhole: Blackhole) {
+    blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(2)))
+  }
+
+  @Benchmark
+  fun highBranchingFactorPrefixSearchCompact(blackhole: Blackhole) {
+    blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(192, 168, 1)))
+  }
+
+  @Benchmark
+  fun highBranchingFactorPrefixSearchStandard(blackhole: Blackhole) {
+    blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(192, 168, 1)))
+  }
+
+  @Benchmark
+  fun deeplyNestedPrefixSearchCompact(blackhole: Blackhole) {
+    blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(1, 2)))
+  }
+
+  @Benchmark
+  fun deeplyNestedPrefixSearchStandard(blackhole: Blackhole) {
+    blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(1, 2)))
+  }
+
+  @Benchmark
+  fun longSharedRemovalCompact(blackhole: Blackhole) {
+    blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(10, 20, 30, 40, 51)))
+  }
+
+  @Benchmark
+  fun longSharedRemovalStandard(blackhole: Blackhole) {
+    blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(10, 20, 30, 40, 51)))
+  }
+
+  @Benchmark
+  fun noSharedRemovalCompact(blackhole: Blackhole) {
+    blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(3, 3, 3)))
+  }
+
+  @Benchmark
+  fun noSharedRemovalStandard(blackhole: Blackhole) {
+    blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(3, 3, 3)))
+  }
+
+  @Benchmark
+  fun highBranchingFactorRemovalCompact(blackhole: Blackhole) {
+    blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(192, 168, 2, 1)))
+  }
+
+  @Benchmark
+  fun highBranchingFactorRemovalStandard(blackhole: Blackhole) {
+    blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(192, 168, 2, 1)))
+  }
+
+  @Benchmark
+  fun deeplyNestedRemovalCompact(blackhole: Blackhole) {
+    blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(1, 2, 3)))
+  }
+
+  @Benchmark
+  fun deeplyNestedRemovalStandard(blackhole: Blackhole) {
+    blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(1, 2, 3)))
+  }
+}

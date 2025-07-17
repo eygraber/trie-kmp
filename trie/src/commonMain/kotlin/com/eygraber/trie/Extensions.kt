@@ -1,16 +1,16 @@
 package com.eygraber.trie
 
 public fun Array<Pair<String, String>>.toTrie(): Trie<String, String> =
-  trieOf(*this)
+  nonOptimizedTrieOf(*this)
 
 public fun Array<Pair<String, String>>.toMutableTrie(): MutableTrie<String, String> =
-  mutableTrieOf(*this)
+  mutableNonOptimizedTrieOf(*this)
 
 public fun Array<Pair<String, String>>.toCompactTrie(): Trie<String, String> =
-  compactTrieOf(*this)
+  trieOf(*this)
 
 public fun Array<Pair<String, String>>.toMutableCompactTrie(): MutableTrie<String, String> =
-  mutableCompactTrieOf(*this)
+  mutableTrieOf(*this)
 
 public fun <K, V> Array<Pair<List<K>, V>>.toTrie(): GenericTrie<K, V> =
   genericTrieOf(*this)
@@ -25,16 +25,16 @@ public fun <K, V> Array<Pair<List<K>, V>>.toMutableCompactTrie(): MutableGeneric
   mutableCompactGenericTrieOf(*this)
 
 public fun Collection<Pair<String, String>>.toTrie(): Trie<String, String> =
-  trieOf(*toTypedArray())
+  nonOptimizedTrieOf(*toTypedArray())
 
 public fun Collection<Pair<String, String>>.toMutableTrie(): MutableTrie<String, String> =
-  mutableTrieOf(*toTypedArray())
+  mutableNonOptimizedTrieOf(*toTypedArray())
 
 public fun Collection<Pair<String, String>>.toCompactTrie(): Trie<String, String> =
-  compactTrieOf(*toTypedArray())
+  trieOf(*toTypedArray())
 
 public fun Collection<Pair<String, String>>.toMutableCompactTrie(): MutableTrie<String, String> =
-  mutableCompactTrieOf(*toTypedArray())
+  mutableTrieOf(*toTypedArray())
 
 public fun <K, V> Collection<Pair<List<K>, V>>.toTrie(): GenericTrie<K, V> =
   genericTrieOf(*toTypedArray())
@@ -49,13 +49,13 @@ public fun <K, V> Collection<Pair<List<K>, V>>.toMutableCompactTrie(): MutableGe
   mutableCompactGenericTrieOf(*toTypedArray())
 
 public fun Map<String, String>.toTrie(): Trie<String, String> =
-  CompactStringTrie<String>().also { it.putAll(this) }
+  CompactStringViewTrie<String>().also { it.putAll(this) }
 
 public fun Map<String, String>.toMutableTrie(): MutableTrie<String, String> =
-  CompactStringTrie<String>().also { it.putAll(this) }
+  CompactStringViewTrie<String>().also { it.putAll(this) }
 
 public fun Map<String, String>.toCompactTrie(): Trie<String, String> =
-  CompactStringTrie<String>().also { it.putAll(this) }
+  CompactStringViewTrie<String>().also { it.putAll(this) }
 
 public fun Map<String, String>.toMutableCompactTrie(): MutableTrie<String, String> =
-  CompactStringTrie<String>().also { it.putAll(this) }
+  CompactStringViewTrie<String>().also { it.putAll(this) }

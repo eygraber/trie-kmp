@@ -22,9 +22,7 @@ public class StandardGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<
 
         fun collectAll(node: StandardTrieNode<K, V>) {
           node.value?.let { allEntries.add(TrieEntry(path.toList(), it)) }
-          for(i in 0 until node.children.size()) {
-            val elem = node.children.keyAt(i)
-            val child = node.children.valueAt(i)
+          node.children.forEach { elem, child ->
             path.add(elem)
             collectAll(child)
             path.removeAt(path.lastIndex)
@@ -61,9 +59,9 @@ public class StandardGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<
   override fun put(key: List<K>, value: V): V? {
     var currentNode = root
 
-    key.fastForEach { element ->
+    key.forEach { element ->
       val currentValue = currentNode.children[element]
-      currentNode = currentValue ?: StandardTrieNode<K, V>().also { currentNode.children.put(element, it) }
+      currentNode = currentValue ?: StandardTrieNode<K, V>().also { currentNode.children[element] = it }
     }
 
     val oldValue = currentNode.value
@@ -90,7 +88,7 @@ public class StandardGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<
     val path = mutableListOf<StandardTrieNode<K, V>>()
     path.add(root)
     var currentNode: StandardTrieNode<K, V>? = root
-    key.fastForEach { element ->
+    key.forEach { element ->
       currentNode = currentNode?.children?.get(element)
       if(currentNode == null) {
         return null // Key not in trie
@@ -159,7 +157,7 @@ public class StandardGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<
 
   private fun findNode(key: List<K>): StandardTrieNode<K, V>? {
     var currentNode = root
-    key.fastForEach { element ->
+    key.forEach { element ->
       currentNode = currentNode.children[element] ?: return null
     }
     return currentNode
@@ -170,9 +168,7 @@ public class StandardGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<
     path: MutableList<K>,
     result: MutableMap<List<K>, V>,
   ) {
-    for(i in 0 until node.children.size()) {
-      val element = node.children.keyAt(i)
-      val childNode = node.children.valueAt(i)
+    node.children.forEach { element, childNode ->
       path.add(element)
       childNode.value?.let {
         result[path.toList()] = it
@@ -186,8 +182,7 @@ public class StandardGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<
     node: StandardTrieNode<K, V>,
     result: MutableList<V>,
   ) {
-    for(i in 0 until node.children.size()) {
-      val childNode = node.children.valueAt(i)
+    node.children.forEachValue { childNode ->
       childNode.value?.let {
         result.add(it)
       }

@@ -35,10 +35,10 @@ abstract class AutoCompleteStringTrieTest {
 
 class CompactAutoCompleteStringTrieTest : AutoCompleteStringTrieTest() {
   override fun createTrie(vararg words: Pair<String, Int>): Trie<String, Int> =
-    mutableCompactTrieOf(*words)
+    mutableTrieOf(*words)
 }
 
 class StandardAutoCompleteStringTrieTest : AutoCompleteStringTrieTest() {
   override fun createTrie(vararg words: Pair<String, Int>): Trie<String, Int> =
-    mutableTrieOf(*words)
+    mutableNonOptimizedTrieOf(*words)
 }

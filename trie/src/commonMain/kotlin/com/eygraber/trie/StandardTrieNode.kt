@@ -12,7 +12,7 @@ internal class StandardTrieNode<K, V> {
   /**
    * A map where keys are sequence elements and values are the corresponding child [StandardTrieNode]s.
    */
-  val children: SimpleArrayMap<K, StandardTrieNode<K, V>> = SimpleArrayMap()
+  val children = SimpleArrayMap<K, StandardTrieNode<K, V>>()
 
   /**
    * The value associated with the key that ends at this node.
