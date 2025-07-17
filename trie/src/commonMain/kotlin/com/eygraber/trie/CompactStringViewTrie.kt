@@ -5,26 +5,26 @@ import androidx.collection.SimpleArrayMap
 /**
  * A highly-optimized, memory-efficient Compact [MutableTrie] specialized for String keys.
  *
- * This implementation uses an index-based traversal to avoid creating intermediate
- * string objects, providing maximum performance.
+ * This implementation uses an index-based, "view" approach for its keys to eliminate
+ * substring allocations during traversal and insertion, providing the highest possible performance.
  *
  * @param V The type of the values.
  */
-public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
-  private val root = CompactStringTrieNode<V>("")
+public class CompactStringViewTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
+  private val root = CompactStringViewTrieNode<V>("", 0, 0)
 
   override var size: Int = 0
     private set
 
   override val entries: MutableSet<MutableMap.MutableEntry<String, V>>
     get() = object : AbstractMutableSet<MutableMap.MutableEntry<String, V>>() {
-      override val size: Int get() = this@CompactStringTrie.size
+      override val size: Int get() = this@CompactStringViewTrie.size
 
       override fun iterator(): MutableIterator<MutableMap.MutableEntry<String, V>> {
         val allEntries = mutableListOf<MutableMap.MutableEntry<String, V>>()
         val path = StringBuilder()
 
-        fun collect(node: CompactStringTrieNode<V>) {
+        fun collect(node: CompactStringViewTrieNode<V>) {
           if(node.isKeyNode()) {
             allEntries.add(TrieEntry(path.toString(), requireNotNull(node.value)))
           }
@@ -51,7 +51,7 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
 
           override fun remove() {
             checkNotNull(lastEntry)
-            this@CompactStringTrie.remove(lastEntry.key)
+            this@CompactStringViewTrie.remove(lastEntry.key)
             backingIterator.remove()
           }
         }
@@ -66,8 +66,9 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
     var keyIndex = 0
     while(keyIndex < key.length) {
       val child = currentNode.children[key[keyIndex]] ?: return null
-      val commonPrefixLength = child.keyPart.commonPrefixLength(key, keyIndex)
-      if(commonPrefixLength < child.keyPart.length) {
+      val commonPrefixLength = commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, key, keyIndex)
+
+      if(commonPrefixLength < child.keyPartLength) {
         return null // Key diverges
       }
       keyIndex += commonPrefixLength
@@ -86,15 +87,16 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
       val child = currentNode.children[firstChar]
 
       if(child == null) {
-        // No child, create a new branch for the rest of the key
-        currentNode.children[firstChar] = CompactStringTrieNode(key.substring(keyIndex), value)
+        // No child, create a new branch for the rest of the key.
+        // The new node views the key we are currently inserting.
+        currentNode.children[firstChar] = CompactStringViewTrieNode(key, keyIndex, key.length, value)
         size++
         return null
       }
 
-      val commonPrefixLength = child.keyPart.commonPrefixLength(key, keyIndex)
+      val commonPrefixLength = commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, key, keyIndex)
 
-      if(commonPrefixLength == child.keyPart.length) {
+      if(commonPrefixLength == child.keyPartLength) {
         // The existing node's key is a prefix of our key.
         // Continue search from the child node.
         keyIndex += commonPrefixLength
@@ -103,32 +105,45 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
       }
 
       // --- Split is required ---
-      val remainderOfOriginalKey = child.keyPart.substring(commonPrefixLength)
-      val remainderOfNewKey = key.substring(keyIndex + commonPrefixLength)
+      val remainderOfNewKeyIndex = keyIndex + commonPrefixLength
 
-      val newOriginalNode = CompactStringTrieNode(remainderOfOriginalKey, child.value).apply {
+      // 1. Create a new node for the remainder of the original key.
+      val newOriginalNode = CompactStringViewTrieNode(
+        sourceKey = child.sourceKey,
+        keyPartStart = child.keyPartStart + commonPrefixLength,
+        keyPartEnd = child.keyPartEnd,
+        value = child.value,
+      ).apply {
         children.putAll(child.children)
       }
 
-      child.keyPart = child.keyPart.substring(0, commonPrefixLength)
+      // 2. Repurpose the current child to be the common prefix node.
+      child.keyPartEnd = child.keyPartStart + commonPrefixLength
       child.children.clear()
       child.children[newOriginalNode.keyPart[0]] = newOriginalNode
 
-      if(remainderOfNewKey.isEmpty()) {
+      // 3. Handle the new key's remainder.
+      if(remainderOfNewKeyIndex == key.length) {
+        // The new key is exactly the common prefix.
         val oldValue = child.value
         child.value = value
         size++
         return oldValue
       }
       else {
+        // The new key diverges.
         child.value = null
-        child.children[remainderOfNewKey[0]] = CompactStringTrieNode(remainderOfNewKey, value)
+        child.children[key[remainderOfNewKeyIndex]] = CompactStringViewTrieNode(
+          sourceKey = key,
+          keyPartStart = remainderOfNewKeyIndex,
+          keyPartEnd = key.length,
+          value = value,
+        )
         size++
         return null
       }
     }
 
-    // This case handles putting a value at the root (empty string key).
     val oldValue = currentNode.value
     if(oldValue == null) size++
     currentNode.value = value
@@ -145,7 +160,7 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
 
   @Suppress("ReturnCount")
   private fun removeRecursive(
-    currentNode: CompactStringTrieNode<V>,
+    currentNode: CompactStringViewTrieNode<V>,
     key: String,
     keyIndex: Int,
   ): Pair<V?, Boolean> {
@@ -158,24 +173,40 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
     val firstChar = key[keyIndex]
     val child = currentNode.children[firstChar] ?: return null to false
 
-    val commonPrefixLength = child.keyPart.commonPrefixLength(key, keyIndex)
-    if(commonPrefixLength < child.keyPart.length) return null to false
+    val commonPrefixLength = commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, key, keyIndex)
+    if(commonPrefixLength < child.keyPartLength) return null to false
 
     val (oldValue, removed) = removeRecursive(child, key, keyIndex + commonPrefixLength)
 
     if(removed) {
-      // If a descendant was removed, check if we need to prune or merge the child
+      // After a child has been modified or removed, check its state for pruning or merging.
       if(!child.isKeyNode() && child.children.size() == 1) {
-        // Merge child with its single grandchild
+        // This node is now just a pass-through. Merge it with its single child
+        // to shorten the tree and mitigate memory retention.
         val grandchild = child.children.first()
-        child.keyPart += grandchild.keyPart
+
+        // Create a new, perfectly-sized string for the combined key part.
+        val newKeyPart = child.keyPart.toString() + grandchild.keyPart.toString()
+
+        child.sourceKey = newKeyPart
+        child.keyPartStart = 0
+        child.keyPartEnd = newKeyPart.length
         child.value = grandchild.value
         child.children.clear()
         child.children.putAll(grandchild.children)
       }
       else if(!child.isKeyNode() && child.children.isEmpty()) {
-        // Prune the child if it's now an empty leaf
+        // If the child is now an empty, non-key leaf, prune it from the tree.
         currentNode.children.remove(firstChar)
+      }
+      else if(child.sourceKey.length > child.keyPartLength * 2 && child.keyPartLength > 0) {
+        // As a final mitigation, if the child node is still valid but its sourceKey
+        // is much larger than its keyPart view, compact it to release the
+        // reference to the large source string.
+        val newKeyPart = child.keyPart.toString()
+        child.sourceKey = newKeyPart
+        child.keyPartStart = 0
+        child.keyPartEnd = newKeyPart.length
       }
     }
 
@@ -194,8 +225,9 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
     var keyIndex = 0
     while(keyIndex < prefix.length) {
       val child = currentNode.children[prefix[keyIndex]] ?: return false
-      val commonPrefixLength = child.keyPart.commonPrefixLength(prefix, keyIndex)
-      if(commonPrefixLength < child.keyPart.length && keyIndex + commonPrefixLength < prefix.length) {
+      val commonPrefixLength =
+        commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, prefix, keyIndex)
+      if(commonPrefixLength < child.keyPartLength && keyIndex + commonPrefixLength < prefix.length) {
         return false
       }
       if(prefix.length - keyIndex <= commonPrefixLength) {
@@ -216,9 +248,9 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
 
     while(keyIndex < prefix.length) {
       val child = currentNode.children[prefix[keyIndex]] ?: return emptyMap()
-      val commonPrefixLength = child.keyPart.commonPrefixLength(prefix, keyIndex)
-
-      if(commonPrefixLength < child.keyPart.length && keyIndex + commonPrefixLength < prefix.length) {
+      val commonPrefixLength =
+        commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, prefix, keyIndex)
+      if(commonPrefixLength < child.keyPartLength && keyIndex + commonPrefixLength < prefix.length) {
         return emptyMap()
       }
 
@@ -242,14 +274,15 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
 
   @Suppress("ReturnCount")
   override fun getAllValuesWithPrefix(prefix: String): Collection<V> {
+    val results = mutableListOf<V>()
     var currentNode = root
     var keyIndex = 0
 
     while(keyIndex < prefix.length) {
       val child = currentNode.children[prefix[keyIndex]] ?: return emptyList()
-      val commonPrefixLength = child.keyPart.commonPrefixLength(prefix, keyIndex)
-
-      if(commonPrefixLength < child.keyPart.length && keyIndex + commonPrefixLength < prefix.length) {
+      val commonPrefixLength =
+        commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, prefix, keyIndex)
+      if(commonPrefixLength < child.keyPartLength && keyIndex + commonPrefixLength < prefix.length) {
         return emptyList()
       }
 
@@ -262,7 +295,6 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
       keyIndex += commonPrefixLength
     }
 
-    val results = mutableListOf<V>()
     if(currentNode.isKeyNode()) {
       results.add(requireNotNull(currentNode.value))
     }
@@ -270,7 +302,7 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
     return results
   }
 
-  private fun collectAll(node: CompactStringTrieNode<V>, path: StringBuilder, results: MutableMap<String, V>) {
+  private fun collectAll(node: CompactStringViewTrieNode<V>, path: StringBuilder, results: MutableMap<String, V>) {
     node.children.forEachValue { childNode ->
       path.append(childNode.keyPart)
       if(childNode.isKeyNode()) {
@@ -281,7 +313,7 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
     }
   }
 
-  private fun collectAllValues(node: CompactStringTrieNode<V>, results: MutableList<V>) {
+  private fun collectAllValues(node: CompactStringViewTrieNode<V>, results: MutableList<V>) {
     node.children.forEachValue { childNode ->
       if(childNode.isKeyNode()) {
         results.add(requireNotNull(childNode.value))
@@ -292,28 +324,41 @@ public class CompactStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
 }
 
 /**
- * A node in the high-performance [CompactStringTrie].
- * It stores a part of the key as a String.
+ * A node in the ultimate-performance String Compact Trie.
+ * It stores a "view" of a key part using a reference to the original source string
+ * and start/end indices, avoiding the allocation of substring objects.
  *
  * @param V The type of value stored in the Trie.
  */
-private class CompactStringTrieNode<V>(
-  var keyPart: String,
+private class CompactStringViewTrieNode<V>(
+  // A reference to the original string that this node's key part comes from.
+  var sourceKey: String,
+  // The start index (inclusive) of this node's key part within sourceKey.
+  var keyPartStart: Int,
+  // The end index (exclusive) of this node's key part within sourceKey.
+  var keyPartEnd: Int,
   var value: V? = null,
 ) {
-  val children = SimpleArrayMap<Char, CompactStringTrieNode<V>>()
+  val children = SimpleArrayMap<Char, CompactStringViewTrieNode<V>>()
+
+  val keyPart: CharSequence
+    get() = sourceKey.subSequence(keyPartStart, keyPartEnd)
+
+  val keyPartLength: Int
+    get() = keyPartEnd - keyPartStart
 
   fun isKeyNode(): Boolean = value != null
 
   override fun toString(): String = "$value=$children"
-
   override fun equals(other: Any?): Boolean {
     if(this === other) return true
     if(other == null || this::class != other::class) return false
 
-    other as CompactStringTrieNode<*>
+    other as CompactStringViewTrieNode<*>
 
-    if(keyPart != other.keyPart) return false
+    if(keyPartStart != other.keyPartStart) return false
+    if(keyPartEnd != other.keyPartEnd) return false
+    if(sourceKey != other.sourceKey) return false
     if(value != other.value) return false
     if(children != other.children) return false
 
@@ -321,9 +366,33 @@ private class CompactStringTrieNode<V>(
   }
 
   override fun hashCode(): Int {
-    var result = keyPart.hashCode()
+    var result = keyPartStart
+    result = 31 * result + keyPartEnd
+    result = 31 * result + sourceKey.hashCode()
     result = 31 * result + (value?.hashCode() ?: 0)
     result = 31 * result + children.hashCode()
     return result
   }
+}
+
+/**
+ * An allocation-free helper to find the length of the common prefix between a node's key part
+ * (represented by a view) and the search key (represented by the full string and an offset).
+ */
+private fun commonPrefixLength(
+  nodeKey: String,
+  nodeStart: Int,
+  nodeEnd: Int,
+  searchKey: String,
+  searchStart: Int,
+): Int {
+  val nodeLength = nodeEnd - nodeStart
+  val searchLength = searchKey.length - searchStart
+  val minLength = minOf(nodeLength, searchLength)
+  for(i in 0 until minLength) {
+    if(nodeKey[nodeStart + i] != searchKey[searchStart + i]) {
+      return i
+    }
+  }
+  return minLength
 }

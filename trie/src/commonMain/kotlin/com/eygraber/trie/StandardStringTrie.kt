@@ -4,7 +4,7 @@ package com.eygraber.trie
  * A high-performance, non-compact [MutableTrie] implementation specialized for String keys.
  *
  * This implementation is generally faster for individual key lookups (`get`, `containsKey`)
- * than a [CompactStringTrie] due to its simpler logic, but it uses more memory.
+ * than a [CompactStringViewTrie] due to its simpler logic, but it uses more memory.
  *
  * @param V The type of the values.
  */
@@ -26,9 +26,7 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
           if(node.isKeyNode()) {
             allEntries.add(TrieEntry(path.toString(), requireNotNull(node.value)))
           }
-          for(i in 0 until node.children.size()) {
-            val char = node.children.keyAt(i)
-            val childNode = node.children.valueAt(i)
+          node.children.forEach { char, childNode ->
             path.append(char)
             collect(childNode)
             path.setLength(path.length - 1) // Backtrack
@@ -74,7 +72,7 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
 
     for(i in 0 until key.length) {
       val currentValue = currentNode.children[key[i]]
-      currentNode = currentValue ?: StandardTrieNode<Char, V>().also { currentNode.children.put(key[i], it) }
+      currentNode = currentValue ?: StandardTrieNode<Char, V>().also { currentNode.children[key[i]] = it }
     }
 
     val oldValue = currentNode.value
@@ -169,10 +167,7 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
   }
 
   private fun collectAll(node: StandardTrieNode<Char, V>, path: StringBuilder, results: MutableMap<String, V>) {
-    for(i in 0 until node.children.size()) {
-      val char = node.children.keyAt(i)
-      val childNode = node.children.valueAt(i)
-
+    node.children.forEach { char, childNode ->
       path.append(char)
       if(childNode.isKeyNode()) {
         results[path.toString()] = requireNotNull(childNode.value)
@@ -183,8 +178,7 @@ public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() 
   }
 
   private fun collectAllValues(node: StandardTrieNode<Char, V>, results: MutableList<V>) {
-    for(i in 0 until node.children.size()) {
-      val childNode = node.children.valueAt(i)
+    node.children.forEachValue { childNode ->
       if(childNode.isKeyNode()) {
         results.add(requireNotNull(childNode.value))
       }

@@ -1,30 +1,50 @@
 package com.eygraber.trie
 
 /**
- * Creates a new read-only [Trie] with the given String keys and values.
+ * Creates a new compact read-only [Trie] with the given String keys and values.
  */
-public fun <V> trieOf(vararg pairs: Pair<String, V>): Trie<String, V> = mutableTrieOf(*pairs)
-
-/**
- * Creates a new [MutableTrie] with the given String keys and values.
- */
-public fun <V> mutableTrieOf(vararg pairs: Pair<String, V>): MutableTrie<String, V> {
-  val trie = StandardStringTrie<V>()
-  pairs.forEach { (key, value) -> trie[key] = value }
+public fun <V> trieOf(vararg pairs: Pair<String, V>): Trie<String, V> {
+  val trie = CompactStringViewTrie<V>()
+  trie.putAll(*pairs)
   return trie
 }
 
 /**
- * Creates a new compact read-only [Trie] with the given String keys and values.
- */
-public fun <V> compactTrieOf(vararg pairs: Pair<String, V>): Trie<String, V> = mutableCompactTrieOf(*pairs)
-
-/**
  * Creates a new compact [MutableTrie] with the given String keys and values.
  */
-public fun <V> mutableCompactTrieOf(vararg pairs: Pair<String, V>): MutableTrie<String, V> {
-  val trie = CompactStringTrie<V>()
-  pairs.forEach { (key, value) -> trie[key] = value }
+public fun <V> mutableTrieOf(
+  vararg pairs: Pair<String, V>,
+  /**
+   * Will return an implementation that is safer to remove from, but has slightly worse insertion performance.
+   *
+   * If you don't call [MutableTrie.remove],
+   * or don't use large [String] as your keys, you may choose to set this to `false`.
+   *
+   * The less-safe implementation could potentially leak a [String] key after it has been removed.
+   */
+  useSaferImplementationForRemovals: Boolean = true,
+): MutableTrie<String, V> {
+  // if there will be removals it is better to use CompactStringTrie since
+  // CompactStringViewTrie could leak String keys after removal in some scenarios
+  val trie = when {
+    useSaferImplementationForRemovals -> CompactStringTrie<V>()
+    else -> CompactStringViewTrie()
+  }
+  trie.putAll(*pairs)
+  return trie
+}
+
+/**
+ * Creates a new read-only [Trie] with the given String keys and values.
+ */
+public fun <V> nonOptimizedTrieOf(vararg pairs: Pair<String, V>): Trie<String, V> = mutableNonOptimizedTrieOf(*pairs)
+
+/**
+ * Creates a new [MutableTrie] with the given String keys and values.
+ */
+public fun <V> mutableNonOptimizedTrieOf(vararg pairs: Pair<String, V>): MutableTrie<String, V> {
+  val trie = StandardStringTrie<V>()
+  trie.putAll(*pairs)
   return trie
 }
 
@@ -41,7 +61,7 @@ public fun <K, V> genericTrieOf(vararg pairs: Pair<List<K>, V>): GenericTrie<K, 
  */
 public fun <K, V> mutableGenericTrieOf(vararg pairs: Pair<List<K>, V>): MutableGenericTrie<K, V> {
   val trie = StandardGenericTrie<K, V>()
-  trie.putAll(pairs.toMap())
+  trie.putAll(*pairs)
   return trie
 }
 
@@ -58,7 +78,7 @@ public fun <K, V> compactGenericTrieOf(vararg pairs: Pair<List<K>, V>): GenericT
  */
 public fun <K, V> mutableCompactGenericTrieOf(vararg pairs: Pair<List<K>, V>): MutableGenericTrie<K, V> {
   val trie = CompactGenericTrie<K, V>()
-  trie.putAll(pairs.toMap())
+  trie.putAll(*pairs)
   return trie
 }
 

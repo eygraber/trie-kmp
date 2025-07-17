@@ -1,6 +1,6 @@
 package com.eygraber.trie.benchmark
 
-import com.eygraber.trie.mutableCompactTrieOf
+import com.eygraber.trie.mutableNonOptimizedTrieOf
 import com.eygraber.trie.mutableTrieOf
 import com.eygraber.trie.utils.CharSpellChecker
 import com.eygraber.trie.utils.StringSpellChecker
@@ -15,20 +15,14 @@ import kotlinx.benchmark.Scope
 import kotlinx.benchmark.Setup
 import kotlinx.benchmark.State
 import kotlinx.benchmark.Warmup
-import kotlin.random.Random
 
 @State(Scope.Benchmark)
 @Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
-@Measurement(iterations = 10, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
-@OutputTimeUnit(BenchmarkTimeUnit.MILLISECONDS)
+@Measurement(iterations = 20, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@OutputTimeUnit(BenchmarkTimeUnit.MICROSECONDS)
 @BenchmarkMode(Mode.AverageTime)
 class SpellCheckBenchmarks {
-  private val charPool: List<Char> = ('a'..'z').toList()
-  private val wordLength = 8
-  private val dictionarySize = 10_000
-  private val wordsToCheckCount = 200
-
-  private lateinit var wordsToCorrect: List<String>
+  private val wordToCorrect = "aple"
 
   private lateinit var compactStringTrieSpellChecker: StringSpellChecker
   private lateinit var standardStringTrieSpellChecker: StringSpellChecker
@@ -38,17 +32,20 @@ class SpellCheckBenchmarks {
 
   @Setup
   fun setup() {
-    val random = Random(42)
-    val dictionaryWords = List(dictionarySize) {
-      (1..wordLength).map { charPool.random(random) }.joinToString("")
-    }.toSet() // Use a set to ensure unique words
+    val dictionaryWords =
+      BenchmarkData
+        .StringBased
+        .realisticStringMix
+        .map { it.first }
+        .toSet() // Use a set to ensure unique words
 
-    val standardStringDictionary = mutableTrieOf(
+    val standardStringDictionary = mutableNonOptimizedTrieOf(
       *dictionaryWords.map { it to true }.toTypedArray(),
     )
 
-    val compactStringDictionary = mutableCompactTrieOf(
-      *dictionaryWords.map { it to true }.toTypedArray(),
+    val compactStringDictionary = mutableTrieOf(
+      pairs = dictionaryWords.map { it to true }.toTypedArray(),
+      useSaferImplementationForRemovals = false,
     )
 
     val standardGenericDictionary = mutableGenericTrieOfString(
@@ -64,45 +61,25 @@ class SpellCheckBenchmarks {
 
     compactGenericTrieSpellChecker = CharSpellChecker(compactGenericDictionary)
     standardGenericTrieSpellChecker = CharSpellChecker(standardGenericDictionary)
-
-    wordsToCorrect = List(wordsToCheckCount) {
-      val originalWord = dictionaryWords.random(random)
-      // Apply one deletion to create a misspelling
-      if(originalWord.isNotEmpty()) {
-        val deletionIndex = random.nextInt(originalWord.length)
-        originalWord.removeRange(deletionIndex, deletionIndex + 1)
-      }
-      else {
-        "a" // fallback for empty string case
-      }
-    }
   }
 
   @Benchmark
-  fun spellCheckCompactStringTrie(blackhole: Blackhole) {
-    for(word in wordsToCorrect) {
-      blackhole.consume(compactStringTrieSpellChecker.suggest(word))
-    }
+  fun genericCompact(blackhole: Blackhole) {
+    blackhole.consume(compactGenericTrieSpellChecker.suggest(wordToCorrect))
   }
 
   @Benchmark
-  fun spellCheckCompactGenericTrie(blackhole: Blackhole) {
-    for(word in wordsToCorrect) {
-      blackhole.consume(compactGenericTrieSpellChecker.suggest(word))
-    }
+  fun genericStandard(blackhole: Blackhole) {
+    blackhole.consume(standardGenericTrieSpellChecker.suggest(wordToCorrect))
   }
 
   @Benchmark
-  fun spellCheckStandardStringTrie(blackhole: Blackhole) {
-    for(word in wordsToCorrect) {
-      blackhole.consume(standardStringTrieSpellChecker.suggest(word))
-    }
+  fun stringCompact(blackhole: Blackhole) {
+    blackhole.consume(compactStringTrieSpellChecker.suggest(wordToCorrect))
   }
 
   @Benchmark
-  fun spellCheckStandardGenericTrie(blackhole: Blackhole) {
-    for(word in wordsToCorrect) {
-      blackhole.consume(standardGenericTrieSpellChecker.suggest(word))
-    }
+  fun stringStandardTrie(blackhole: Blackhole) {
+    blackhole.consume(standardStringTrieSpellChecker.suggest(wordToCorrect))
   }
 }

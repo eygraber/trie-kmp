@@ -97,6 +97,9 @@ public interface MutableTrie<K, V> : Trie<K, V>, MutableMap<K, V> {
 
   /**
    * Updates this trie with key/value pairs from the specified map [from].
+   *
+   * Unless you already have a `Map instance`, it will be more
+   * performant to use the`MutableTrie.putAll(vararg Pair<K, V>)` overload.
    */
   override fun putAll(from: Map<out K, V>)
 
@@ -113,6 +116,14 @@ public interface MutableTrie<K, V> : Trie<K, V>, MutableMap<K, V> {
    * The trie will be empty after this call returns.
    */
   override fun clear()
+}
+
+/**
+ * Updates this trie with key/value pairs.
+ */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun <K, V> MutableTrie<K, V>.putAll(vararg from: Pair<K, V>) {
+  from.forEach { (key, value) -> put(key, value) }
 }
 
 /**

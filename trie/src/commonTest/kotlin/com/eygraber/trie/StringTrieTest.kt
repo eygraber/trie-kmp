@@ -247,7 +247,18 @@ abstract class StringTrieTest {
 
 class CompactStringTrieTest : StringTrieTest() {
   override fun <V> createStringTrie(vararg pairs: Pair<String, V>): MutableTrie<String, V> =
-    mutableCompactTrieOf(*pairs)
+    mutableTrieOf(*pairs)
+
+  override fun <V> createGenericTrie(vararg pairs: Pair<String, V>): MutableGenericTrie<Char, V> =
+    mutableCompactGenericTrieOfString(*pairs)
+}
+
+class CompactStringViewTrieTest : StringTrieTest() {
+  override fun <V> createStringTrie(vararg pairs: Pair<String, V>): MutableTrie<String, V> =
+    mutableTrieOf(
+      pairs = pairs,
+      useSaferImplementationForRemovals = false,
+    )
 
   override fun <V> createGenericTrie(vararg pairs: Pair<String, V>): MutableGenericTrie<Char, V> =
     mutableCompactGenericTrieOfString(*pairs)
@@ -255,7 +266,7 @@ class CompactStringTrieTest : StringTrieTest() {
 
 class StandardStringTrieTest : StringTrieTest() {
   override fun <V> createStringTrie(vararg pairs: Pair<String, V>): MutableTrie<String, V> =
-    mutableTrieOf(*pairs)
+    mutableNonOptimizedTrieOf(*pairs)
 
   override fun <V> createGenericTrie(vararg pairs: Pair<String, V>): MutableGenericTrie<Char, V> =
     mutableGenericTrieOfString(*pairs)

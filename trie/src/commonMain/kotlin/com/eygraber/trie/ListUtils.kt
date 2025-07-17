@@ -1,6 +1,6 @@
 package com.eygraber.trie
 
-internal inline fun <T> List<T>.fastForEach(block: (T) -> Unit) {
+internal inline fun <T> List<T>.forEach(block: (T) -> Unit) {
   if(this is RandomAccess) {
     for(i in 0 until size) {
       block(this[i])
@@ -13,23 +13,21 @@ internal inline fun <T> List<T>.fastForEach(block: (T) -> Unit) {
   }
 }
 
-internal fun <T> List<T>.commonPrefixLength(other: List<T>): Int =
+@Suppress("ReturnCount")
+internal fun <T> List<T>.commonPrefixLength(other: List<T>, otherOffset: Int = 0): Int {
   if(this is RandomAccess && other is RandomAccess) {
-    var commonPrefixLength = 0
-    val minLength = minOf(size, other.size)
+    val minLength = minOf(this.size, other.size - otherOffset)
     for(i in 0 until minLength) {
-      if(this[i] == other[i]) {
-        commonPrefixLength++
-      }
-      else {
-        break
+      if(this[i] != other[i + otherOffset]) {
+        return i
       }
     }
-    commonPrefixLength
+    return minLength
   }
   else {
-    zip(other).takeWhile { it.first == it.second }.count()
+    return zip(other).takeWhile { it.first == it.second }.count()
   }
+}
 
 internal fun <T> List<T>.fastDrop(n: Int): List<T> =
   if(this is RandomAccess) {

@@ -25,6 +25,12 @@ jobs:
       - name: Run JVM benchmark
         run: ./gradlew :benchmarks:jvmBenchmark
 
+      - name: Upload JVM benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: jvm_benchmark
+          path: benchmarks/build/reports/benchmarks/main/**/
+
   benchmark-linux:
     runs-on: ubuntu-latest
     steps:
@@ -42,6 +48,13 @@ jobs:
 
       - name: Run Native Linux benchmark
         run: ./gradlew :benchmarks:linuxX64Benchmark
+
+
+      - name: Upload Native Linux benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux_x64_benchmark
+          path: benchmarks/build/reports/benchmarks/main/**/
 
   benchmark-node-js:
     if: false # disabled because heap keeps running out of memory
@@ -62,6 +75,13 @@ jobs:
       - name: Run Node JS benchmark
         run: ./gradlew :benchmarks:jsBenchmark
 
+
+      - name: Upload Node JS benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: node_js_benchmark
+          path: benchmarks/build/reports/benchmarks/main/**/
+
   benchmark-mac:
     runs-on: macos-latest
     steps:
@@ -80,6 +100,13 @@ jobs:
       - name: Run Native Mac ARM64 benchmark
         run: ./gradlew :benchmarks:macosArm64Benchmark
 
+
+      - name: Upload Native Mac ARM64 benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac_arm64_benchmark
+          path: benchmarks/build/reports/benchmarks/main/**/
+
   benchmark-windows:
     runs-on: windows-latest
     steps:
@@ -97,6 +124,13 @@ jobs:
 
       - name: Run Native Mingw benchmark
         run: ./gradlew :benchmarks:mingwX64Benchmark
+
+
+      - name: Upload Native Mingw benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: mingw_x64_benchmark
+          path: benchmarks/build/reports/benchmarks/main/**/
 
 env:
   GRADLE_OPTS: -Dorg.gradle.daemon=false -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx16g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=1024m"
