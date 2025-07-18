@@ -1,9 +1,11 @@
 package com.eygraber.trie
 
-internal inline fun <T> List<T>.forEach(block: (T) -> Unit) {
-  if(this is RandomAccess) {
+@PublishedApi
+internal inline fun <T> Collection<T>.fastForEach(block: (T) -> Unit) {
+  val list = this as? List<T> ?: toList()
+  if(list is RandomAccess) {
     for(i in 0 until size) {
-      block(this[i])
+      block(list[i])
     }
   }
   else {

@@ -168,7 +168,7 @@ The best choice depends on your specific workload.
 | **Prefix Search (High Branching Factor)** | **~0.02 µs/op**                       | ~0.03 µs/op                                 | **StandardGenericTrie** |
 | **Prefix Search (Long Shared Prefix)**    | **~0.03 µs/op**                       | **~0.03 µs/op**                             | **Tie**                 |
 | **Prefix Search (No Shared Prefix)**      | **~0.01 µs/op**                       | **~0.01 µs/op**                             | **Tie**                 |
-| **Autocomplete**                          | **~0.90 µs/op**                       | ~1.07 µs/op                                 | **StandardGenericTrie** |
+| **Autocomplete**                          | **~0.90 µs/op**                       | ~1.00 µs/op                                 | **StandardGenericTrie** |
 | **Spell Check**                           | **~11 µs/op**                         | ~13 µs/op                                   | **StandardGenericTrie** |
 | **Removal (Deeply Nested)**               | **~0.02 µs/op**                       | ~0.03 µs/op                                 | **StandardGenericTrie** |
 | **Removal (High Branching Factor)**       | **~0.02 µs/op**                       | ~0.03 µs/op                                 | **StandardGenericTrie** |

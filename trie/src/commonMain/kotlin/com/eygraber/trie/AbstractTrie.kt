@@ -1,44 +1,36 @@
 package com.eygraber.trie
 
-public abstract class AbstractTrie<K, V> : MutableTrie<K, V> {
-  abstract override val size: Int
-  abstract override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
+public abstract class AbstractTrie<K, V> : Trie<K, V> {
+  abstract override val entries: Set<Map.Entry<K, V>>
 
-  override val keys: MutableSet<K>
-    get() = object : AbstractMutableSet<K>() {
+  abstract override val size: Int
+
+  override val keys: Set<K>
+    get() = object : AbstractSet<K>() {
       override val size: Int get() = this@AbstractTrie.size
 
-      override fun iterator(): MutableIterator<K> =
-        object : MutableIterator<K> {
+      override fun iterator(): Iterator<K> =
+        @Suppress("IteratorNotThrowingNoSuchElementException")
+        object : Iterator<K> {
           private val entryIterator = entries.iterator()
           override fun hasNext(): Boolean = entryIterator.hasNext()
           override fun next(): K = entryIterator.next().key
-          override fun remove() = entryIterator.remove()
         }
-
-      override fun add(element: K): Boolean = throw UnsupportedOperationException()
     }
 
-  override val values: MutableCollection<V>
-    get() = object : AbstractMutableCollection<V>() {
+  override val values: Collection<V>
+    get() = object : AbstractCollection<V>() {
       override val size: Int get() = this@AbstractTrie.size
 
-      override fun iterator(): MutableIterator<V> =
-        object : MutableIterator<V> {
+      override fun iterator(): Iterator<V> =
+        @Suppress("IteratorNotThrowingNoSuchElementException")
+        object : Iterator<V> {
           private val entryIterator = entries.iterator()
-
           override fun hasNext(): Boolean = entryIterator.hasNext()
           override fun next(): V = entryIterator.next().value
-          override fun remove() = entryIterator.remove()
         }
-
-      override fun add(element: V): Boolean = throw UnsupportedOperationException()
     }
 
-  abstract override fun get(key: K): V?
-  abstract override fun put(key: K, value: V): V?
-  abstract override fun remove(key: K): V?
-  abstract override fun clear()
   abstract override fun startsWith(prefix: K): Boolean
   abstract override fun getAllWithPrefix(prefix: K): Map<K, V>
   abstract override fun getAllValuesWithPrefix(prefix: K): Collection<V>
@@ -46,10 +38,6 @@ public abstract class AbstractTrie<K, V> : MutableTrie<K, V> {
   override fun isEmpty(): Boolean = size == 0
 
   override fun containsValue(value: V): Boolean = values.any { it == value }
-
-  override fun putAll(from: Map<out K, V>) {
-    from.forEach { (key, value) -> put(key, value) }
-  }
 
   override fun containsKey(key: K): Boolean = get(key) != null
 
@@ -75,6 +63,49 @@ public abstract class AbstractTrie<K, V> : MutableTrie<K, V> {
     catch(_: NullPointerException) {
       false
     }
+  }
+}
+
+public abstract class AbstractMutableTrie<K, V> : MutableTrie<K, V>, AbstractTrie<K, V>() {
+  abstract override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
+
+  override val keys: MutableSet<K>
+    get() = object : AbstractMutableSet<K>() {
+      override val size: Int get() = this@AbstractMutableTrie.size
+
+      override fun iterator(): MutableIterator<K> =
+        object : MutableIterator<K> {
+          private val entryIterator = entries.iterator()
+          override fun hasNext(): Boolean = entryIterator.hasNext()
+          override fun next(): K = entryIterator.next().key
+          override fun remove() = entryIterator.remove()
+        }
+
+      override fun add(element: K): Boolean = throw UnsupportedOperationException()
+    }
+
+  override val values: MutableCollection<V>
+    get() = object : AbstractMutableCollection<V>() {
+      override val size: Int get() = this@AbstractMutableTrie.size
+
+      override fun iterator(): MutableIterator<V> =
+        object : MutableIterator<V> {
+          private val entryIterator = entries.iterator()
+
+          override fun hasNext(): Boolean = entryIterator.hasNext()
+          override fun next(): V = entryIterator.next().value
+          override fun remove() = entryIterator.remove()
+        }
+
+      override fun add(element: V): Boolean = throw UnsupportedOperationException()
+    }
+
+  abstract override fun put(key: K, value: V): V?
+  abstract override fun remove(key: K): V?
+  abstract override fun clear()
+
+  override fun putAll(from: Map<out K, V>) {
+    from.forEach { (key, value) -> put(key, value) }
   }
 
   /**

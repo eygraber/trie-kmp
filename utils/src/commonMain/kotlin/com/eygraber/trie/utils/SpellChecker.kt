@@ -4,7 +4,7 @@ import com.eygraber.trie.GenericTrie
 import com.eygraber.trie.Trie
 
 class StringSpellChecker(
-  private val dictionary: Trie<String, Boolean>,
+  private val dictionary: Trie<String, *>,
 ) : SpellChecker() {
   override fun suggest(word: String): Set<String> {
     // If the word is already correct, return it.
@@ -15,7 +15,7 @@ class StringSpellChecker(
 }
 
 class CharSpellChecker(
-  private val dictionary: GenericTrie<Char, Boolean>,
+  private val dictionary: GenericTrie<Char, *>,
 ) : SpellChecker() {
   override fun suggest(word: String): Set<String> {
     // If the word is already correct, return it.

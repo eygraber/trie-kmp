@@ -1,61 +1,79 @@
 package com.eygraber.trie
 
-public fun Array<Pair<String, String>>.toTrie(): Trie<String, String> =
-  nonOptimizedTrieOf(*this)
+import kotlin.jvm.JvmName
 
-public fun Array<Pair<String, String>>.toMutableTrie(): MutableTrie<String, String> =
-  mutableNonOptimizedTrieOf(*this)
+public fun <V> Array<Pair<String, V>>.toTrie(): Trie<String, V> =
+  trieOf(this)
 
-public fun Array<Pair<String, String>>.toCompactTrie(): Trie<String, String> =
-  trieOf(*this)
+public fun <V> Array<Pair<String, V>>.toMutableTrie(
+  /**
+   * Will return an implementation that is safer to remove from, but has slightly worse insertion performance.
+   *
+   * If you don't call [MutableTrie.remove],
+   * or don't use large [String] as your keys, you may choose to set this to `false`.
+   *
+   * The less-safe implementation could potentially leak a [String] key after it has been removed.
+   */
+  useSaferImplementationForRemovals: Boolean = true,
+): MutableTrie<String, V> =
+  mutableTrieOf(this, useSaferImplementationForRemovals = useSaferImplementationForRemovals)
 
-public fun Array<Pair<String, String>>.toMutableCompactTrie(): MutableTrie<String, String> =
-  mutableTrieOf(*this)
-
+@JvmName("toGenericTrie")
 public fun <K, V> Array<Pair<List<K>, V>>.toTrie(): GenericTrie<K, V> =
-  genericTrieOf(*this)
+  genericTrieOf(this)
 
 public fun <K, V> Array<Pair<List<K>, V>>.toMutableTrie(): MutableGenericTrie<K, V> =
-  mutableGenericTrieOf(*this)
-
-public fun <K, V> Array<Pair<List<K>, V>>.toCompactTrie(): GenericTrie<K, V> =
-  compactGenericTrieOf(*this)
+  mutableGenericTrieOf(this)
 
 public fun <K, V> Array<Pair<List<K>, V>>.toMutableCompactTrie(): MutableGenericTrie<K, V> =
-  mutableCompactGenericTrieOf(*this)
+  mutableCompactGenericTrieOf(this)
 
-public fun Collection<Pair<String, String>>.toTrie(): Trie<String, String> =
-  nonOptimizedTrieOf(*toTypedArray())
+public fun <V> Collection<Pair<String, V>>.toTrie(): Trie<String, V> =
+  trieOf(this)
 
-public fun Collection<Pair<String, String>>.toMutableTrie(): MutableTrie<String, String> =
-  mutableNonOptimizedTrieOf(*toTypedArray())
+public fun <V> Collection<Pair<String, V>>.toMutableTrie(): MutableTrie<String, V> =
+  mutableTrieOf(this)
 
-public fun Collection<Pair<String, String>>.toCompactTrie(): Trie<String, String> =
-  trieOf(*toTypedArray())
-
-public fun Collection<Pair<String, String>>.toMutableCompactTrie(): MutableTrie<String, String> =
-  mutableTrieOf(*toTypedArray())
-
+@JvmName("toGenericTrie")
 public fun <K, V> Collection<Pair<List<K>, V>>.toTrie(): GenericTrie<K, V> =
-  genericTrieOf(*toTypedArray())
+  genericTrieOf(this)
 
 public fun <K, V> Collection<Pair<List<K>, V>>.toMutableTrie(): MutableGenericTrie<K, V> =
-  mutableGenericTrieOf(*toTypedArray())
+  mutableGenericTrieOf(this)
 
 public fun <K, V> Collection<Pair<List<K>, V>>.toCompactTrie(): GenericTrie<K, V> =
-  compactGenericTrieOf(*toTypedArray())
+  compactGenericTrieOf(this)
 
 public fun <K, V> Collection<Pair<List<K>, V>>.toMutableCompactTrie(): MutableGenericTrie<K, V> =
-  mutableCompactGenericTrieOf(*toTypedArray())
+  mutableCompactGenericTrieOf(this)
 
-public fun Map<String, String>.toTrie(): Trie<String, String> =
-  CompactStringViewTrie<String>().also { it.putAll(this) }
+public fun <V> Map<String, V>.toTrie(): Trie<String, V> =
+  trieOf(entries.map { (key, value) -> key to value })
 
-public fun Map<String, String>.toMutableTrie(): MutableTrie<String, String> =
-  CompactStringViewTrie<String>().also { it.putAll(this) }
+public fun <V> Map<String, V>.toMutableTrie(
+  /**
+   * Will return an implementation that is safer to remove from, but has slightly worse insertion performance.
+   *
+   * If you don't call [MutableTrie.remove],
+   * or don't use large [String] as your keys, you may choose to set this to `false`.
+   *
+   * The less-safe implementation could potentially leak a [String] key after it has been removed.
+   */
+  useSaferImplementationForRemovals: Boolean = true,
+): MutableTrie<String, V> =
+  mutableTrieOf(
+    entries.map { (key, value) -> key to value },
+    useSaferImplementationForRemovals = useSaferImplementationForRemovals,
+  )
 
-public fun Map<String, String>.toCompactTrie(): Trie<String, String> =
-  CompactStringViewTrie<String>().also { it.putAll(this) }
+public fun <V> MutableTrie<String, V>.toImmutableTrie(): Trie<String, V> =
+  this as Trie<String, V>
 
-public fun Map<String, String>.toMutableCompactTrie(): MutableTrie<String, String> =
-  CompactStringViewTrie<String>().also { it.putAll(this) }
+public fun <K, V> MutableGenericTrie<K, V>.toImmutableTrie(): GenericTrie<K, V> =
+  this as GenericTrie<K, V>
+
+public fun <V> Trie<String, V>.toMutableTrie(): MutableTrie<String, V> =
+  this as MutableTrie<String, V>
+
+public fun <K, V> GenericTrie<K, V>.toMutableTrie(): MutableGenericTrie<K, V> =
+  this as MutableGenericTrie<K, V>

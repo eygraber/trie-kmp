@@ -10,7 +10,7 @@ import androidx.collection.SimpleArrayMap
  *
  * @param V The type of the values.
  */
-public class CompactStringViewTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
+public class CompactStringViewTrie<V> : Trie<String, V>, AbstractMutableTrie<String, V>() {
   private val root = CompactStringViewTrieNode<V>("", 0, 0)
 
   override var size: Int = 0

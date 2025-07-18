@@ -8,7 +8,7 @@ package com.eygraber.trie
  *
  * @param V The type of the values.
  */
-public class StandardStringTrie<V> : Trie<String, V>, AbstractTrie<String, V>() {
+public class StandardStringTrie<V> : Trie<String, V>, AbstractMutableTrie<String, V>() {
   private val root = StandardTrieNode<Char, V>()
 
   override var size: Int = 0

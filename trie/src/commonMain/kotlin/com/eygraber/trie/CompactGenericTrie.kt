@@ -8,7 +8,7 @@ import androidx.collection.SimpleArrayMap
  * @param K The type of the elements in the key sequences.
  * @param V The type of the values.
  */
-public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<List<K>, V>() {
+public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractMutableTrie<List<K>, V>() {
   private val root = CompactTrieNode<K, V>(emptyList())
   private var internalSize = 0
 

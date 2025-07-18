@@ -43,82 +43,82 @@ class GenericBenchmarks {
   }
 
   @Benchmark
-  fun longSharedPrefixSearchCompact(blackhole: Blackhole) {
+  fun prefixSearchLongSharedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(10, 20, 30)))
   }
 
   @Benchmark
-  fun longSharedPrefixSearchStandard(blackhole: Blackhole) {
+  fun prefixSearchLongSharedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(10, 20, 30)))
   }
 
   @Benchmark
-  fun noSharedPrefixSearchCompact(blackhole: Blackhole) {
+  fun prefixSearchNoSharedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(2)))
   }
 
   @Benchmark
-  fun noSharedPrefixSearchStandard(blackhole: Blackhole) {
+  fun prefixSearchNoSharedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(2)))
   }
 
   @Benchmark
-  fun highBranchingFactorPrefixSearchCompact(blackhole: Blackhole) {
+  fun prefixSearchHighBranchingFactorCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(192, 168, 1)))
   }
 
   @Benchmark
-  fun highBranchingFactorPrefixSearchStandard(blackhole: Blackhole) {
+  fun prefixSearchHighBranchingFactorStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(192, 168, 1)))
   }
 
   @Benchmark
-  fun deeplyNestedPrefixSearchCompact(blackhole: Blackhole) {
+  fun prefixSearchDeeplyNestedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(1, 2)))
   }
 
   @Benchmark
-  fun deeplyNestedPrefixSearchStandard(blackhole: Blackhole) {
+  fun prefixSearchDeeplyNestedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(1, 2)))
   }
 
   @Benchmark
-  fun longSharedRemovalCompact(blackhole: Blackhole) {
+  fun removalLongSharedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(10, 20, 30, 40, 51)))
   }
 
   @Benchmark
-  fun longSharedRemovalStandard(blackhole: Blackhole) {
+  fun removalLongSharedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(10, 20, 30, 40, 51)))
   }
 
   @Benchmark
-  fun noSharedRemovalCompact(blackhole: Blackhole) {
+  fun removalNoSharedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(3, 3, 3)))
   }
 
   @Benchmark
-  fun noSharedRemovalStandard(blackhole: Blackhole) {
+  fun removalNoSharedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(3, 3, 3)))
   }
 
   @Benchmark
-  fun highBranchingFactorRemovalCompact(blackhole: Blackhole) {
+  fun removalHighBranchingFactorCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(192, 168, 2, 1)))
   }
 
   @Benchmark
-  fun highBranchingFactorRemovalStandard(blackhole: Blackhole) {
+  fun removalHighBranchingFactorStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(192, 168, 2, 1)))
   }
 
   @Benchmark
-  fun deeplyNestedRemovalCompact(blackhole: Blackhole) {
+  fun removalDeeplyNestedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix(listOf(1, 2, 3)))
   }
 
   @Benchmark
-  fun deeplyNestedRemovalStandard(blackhole: Blackhole) {
+  fun removalDeeplyNestedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix(listOf(1, 2, 3)))
   }
 }
