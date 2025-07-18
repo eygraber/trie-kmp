@@ -6,7 +6,7 @@ package com.eygraber.trie
  * @param K The type of the elements in the key sequences.
  * @param V The type of the values.
  */
-public class StandardGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractTrie<List<K>, V>() {
+public class StandardGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractMutableTrie<List<K>, V>() {
   private val root = StandardTrieNode<K, V>()
   private var internalSize = 0
 

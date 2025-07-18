@@ -1,7 +1,7 @@
 package com.eygraber.trie.benchmark
 
-import com.eygraber.trie.mutableNonOptimizedTrieOf
-import com.eygraber.trie.mutableTrieOf
+import com.eygraber.trie.nonOptimizedTrieOf
+import com.eygraber.trie.trieOf
 import com.eygraber.trie.utils.CharSpellChecker
 import com.eygraber.trie.utils.StringSpellChecker
 import kotlinx.benchmark.Benchmark
@@ -39,20 +39,19 @@ class SpellCheckBenchmarks {
         .map { it.first }
         .toSet() // Use a set to ensure unique words
 
-    val standardStringDictionary = mutableNonOptimizedTrieOf(
+    val standardStringDictionary = nonOptimizedTrieOf(
+      dictionaryWords.map { it to true },
+    )
+
+    val compactStringDictionary = trieOf(
+      pairs = dictionaryWords.map { it to true },
+    )
+
+    val standardGenericDictionary = genericTrieOfString(
       *dictionaryWords.map { it to true }.toTypedArray(),
     )
 
-    val compactStringDictionary = mutableTrieOf(
-      pairs = dictionaryWords.map { it to true }.toTypedArray(),
-      useSaferImplementationForRemovals = false,
-    )
-
-    val standardGenericDictionary = mutableGenericTrieOfString(
-      *dictionaryWords.map { it to true }.toTypedArray(),
-    )
-
-    val compactGenericDictionary = mutableCompactGenericTrieOfString(
+    val compactGenericDictionary = compactGenericTrieOfString(
       *dictionaryWords.map { it to true }.toTypedArray(),
     )
 

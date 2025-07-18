@@ -1,7 +1,7 @@
 package com.eygraber.trie.benchmark
 
-import com.eygraber.trie.mutableNonOptimizedTrieOf
-import com.eygraber.trie.mutableTrieOf
+import com.eygraber.trie.nonOptimizedTrieOf
+import com.eygraber.trie.trieOf
 import com.eygraber.trie.utils.CharAutoComplete
 import com.eygraber.trie.utils.StringAutoComplete
 import kotlinx.benchmark.Benchmark
@@ -24,11 +24,11 @@ import kotlinx.benchmark.Warmup
 class AutoCompleteBenchmarks {
   private val prefixToComplete = "inter"
 
-  private lateinit var compactStringTrieAutoComplete: StringAutoComplete<Boolean>
-  private lateinit var standardStringTrieAutoComplete: StringAutoComplete<Boolean>
+  private lateinit var compactStringTrieAutoComplete: StringAutoComplete
+  private lateinit var standardStringTrieAutoComplete: StringAutoComplete
 
-  private lateinit var compactGenericTrieAutoComplete: CharAutoComplete<Boolean>
-  private lateinit var standardGenericTrieAutoComplete: CharAutoComplete<Boolean>
+  private lateinit var compactGenericTrieAutoComplete: CharAutoComplete
+  private lateinit var standardGenericTrieAutoComplete: CharAutoComplete
 
   @Setup
   fun setup() {
@@ -39,20 +39,19 @@ class AutoCompleteBenchmarks {
         .map { it.first }
         .toSet() // Use a set to ensure unique words
 
-    val standardStringDictionary = mutableNonOptimizedTrieOf(
+    val standardStringDictionary = nonOptimizedTrieOf(
+      dictionaryWords.map { it to true },
+    )
+
+    val compactStringDictionary = trieOf(
+      pairs = dictionaryWords.map { it to true },
+    )
+
+    val standardGenericDictionary = genericTrieOfString(
       *dictionaryWords.map { it to true }.toTypedArray(),
     )
 
-    val compactStringDictionary = mutableTrieOf(
-      pairs = dictionaryWords.map { it to true }.toTypedArray(),
-      useSaferImplementationForRemovals = false,
-    )
-
-    val standardGenericDictionary = mutableGenericTrieOfString(
-      *dictionaryWords.map { it to true }.toTypedArray(),
-    )
-
-    val compactGenericDictionary = mutableCompactGenericTrieOfString(
+    val compactGenericDictionary = compactGenericTrieOfString(
       *dictionaryWords.map { it to true }.toTypedArray(),
     )
 

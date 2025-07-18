@@ -21,104 +21,104 @@ import kotlinx.benchmark.Warmup
 @OutputTimeUnit(BenchmarkTimeUnit.MICROSECONDS)
 @BenchmarkMode(Mode.AverageTime)
 class StringBenchmarks {
-  private val dataset = BenchmarkData.StringBased.realisticStringMix.toTypedArray()
+  private val dataset = BenchmarkData.StringBased.realisticStringMix
 
   private lateinit var compactTrie: MutableTrie<String, Int>
   private lateinit var standardTrie: MutableTrie<String, Int>
 
   @Setup
   fun setup() {
-    compactTrie = mutableTrieOf(*dataset, useSaferImplementationForRemovals = false)
-    standardTrie = mutableNonOptimizedTrieOf(*dataset)
+    compactTrie = mutableTrieOf(dataset, useSaferImplementationForRemovals = false)
+    standardTrie = mutableNonOptimizedTrieOf(dataset)
   }
 
   @Benchmark
   fun creationCompact(blackhole: Blackhole) {
-    blackhole.consume(mutableTrieOf(*dataset, useSaferImplementationForRemovals = false))
+    blackhole.consume(mutableTrieOf(dataset, useSaferImplementationForRemovals = false))
   }
 
   @Benchmark
   fun creationStandard(blackhole: Blackhole) {
-    blackhole.consume(mutableNonOptimizedTrieOf(*dataset))
+    blackhole.consume(mutableNonOptimizedTrieOf(dataset))
   }
 
   @Benchmark
-  fun longSharedPrefixSearchCompact(blackhole: Blackhole) {
+  fun prefixSearchLongSharedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix("inter"))
   }
 
   @Benchmark
-  fun longSharedPrefixSearchStandard(blackhole: Blackhole) {
+  fun prefixSearchLongSharedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix("inter"))
   }
 
   @Benchmark
-  fun noSharedPrefixSearchCompact(blackhole: Blackhole) {
+  fun prefixSearchNoSharedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix("bana"))
   }
 
   @Benchmark
-  fun noSharedPrefixSearchStandard(blackhole: Blackhole) {
+  fun prefixSearchNoSharedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix("bana"))
   }
 
   @Benchmark
-  fun highBranchingFactorPrefixSearchCompact(blackhole: Blackhole) {
+  fun prefixSearchHighBranchingFactorCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix("te"))
   }
 
   @Benchmark
-  fun highBranchingFactorPrefixSearchStandard(blackhole: Blackhole) {
+  fun prefixSearchHighBranchingFactorStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix("te"))
   }
 
   @Benchmark
-  fun deeplyNestedPrefixSearchCompact(blackhole: Blackhole) {
+  fun prefixSearchDeeplyNestedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix("app"))
   }
 
   @Benchmark
-  fun deeplyNestedPrefixSearchStandard(blackhole: Blackhole) {
+  fun prefixSearchDeeplyNestedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix("app"))
   }
 
   @Benchmark
-  fun longSharedRemovalCompact(blackhole: Blackhole) {
+  fun removalLongSharedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix("internationalization"))
   }
 
   @Benchmark
-  fun longSharedRemovalStandard(blackhole: Blackhole) {
+  fun removalLongSharedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix("internationalization"))
   }
 
   @Benchmark
-  fun noSharedRemovalCompact(blackhole: Blackhole) {
+  fun removalNoSharedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix("cherry"))
   }
 
   @Benchmark
-  fun noSharedRemovalStandard(blackhole: Blackhole) {
+  fun removalNoSharedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix("cherry"))
   }
 
   @Benchmark
-  fun highBranchingFactorRemovalCompact(blackhole: Blackhole) {
+  fun removalHighBranchingFactorCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix("tell"))
   }
 
   @Benchmark
-  fun highBranchingFactorRemovalStandard(blackhole: Blackhole) {
+  fun removalHighBranchingFactorStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix("tell"))
   }
 
   @Benchmark
-  fun deeplyNestedRemovalCompact(blackhole: Blackhole) {
+  fun removalDeeplyNestedCompact(blackhole: Blackhole) {
     blackhole.consume(compactTrie.getAllValuesWithPrefix("appl"))
   }
 
   @Benchmark
-  fun deeplyNestedRemovalStandard(blackhole: Blackhole) {
+  fun removalDeeplyNestedStandard(blackhole: Blackhole) {
     blackhole.consume(standardTrie.getAllValuesWithPrefix("appl"))
   }
 }

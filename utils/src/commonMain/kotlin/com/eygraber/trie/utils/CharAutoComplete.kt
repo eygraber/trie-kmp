@@ -6,7 +6,7 @@ import com.eygraber.trie.Trie
 /**
  * A simple autocomplete engine that suggests completions for a given `List<Char>` prefix.
  */
-class CharAutoComplete<V>(private val data: GenericTrie<Char, V>) {
+class CharAutoComplete(private val data: GenericTrie<Char, *>) {
   fun suggest(prefix: String): Set<String> = data.getAllWithPrefix(prefix.toList())
     .keys
     .map { it.joinToString("") }
@@ -16,7 +16,7 @@ class CharAutoComplete<V>(private val data: GenericTrie<Char, V>) {
 /**
  * A simple autocomplete engine that suggests completions for a given [String] prefix.
  */
-class StringAutoComplete<V>(private val data: Trie<String, V>) {
+class StringAutoComplete(private val data: Trie<String, *>) {
   fun suggest(prefix: String): Set<String> = data.getAllWithPrefix(prefix)
     .keys
     .toSet()

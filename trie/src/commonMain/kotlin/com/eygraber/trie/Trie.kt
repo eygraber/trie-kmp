@@ -1,5 +1,7 @@
 package com.eygraber.trie
 
+import kotlin.jvm.JvmName
+
 /**
  * An immutable Trie (prefix tree) that maps sequences of elements to values.
  *
@@ -16,19 +18,19 @@ public interface Trie<K, V> : Map<K, V> {
   override val size: Int
 
   /**
-   * Returns a [MutableSet] of all keys in this trie.
+   * Returns a [Set] of all keys in this trie.
    */
   override val keys: Set<K>
 
   /**
-   * Returns a [MutableCollection] of all values in this trie. Note that this collection may contain duplicate values.
+   * Returns a [Collection] of all values in this trie. Note that this collection may contain duplicate values.
    */
-  public override val values: MutableCollection<V>
+  public override val values: Collection<V>
 
   /**
-   * Returns a [MutableSet] of all key/value pairs in this trie.
+   * Returns a [Set] of all key/value pairs in this trie.
    */
-  public override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
+  public override val entries: Set<Map.Entry<K, V>>
 
   /**
    * Returns `true` if this trie contains no key-value pairs.
@@ -116,6 +118,38 @@ public interface MutableTrie<K, V> : Trie<K, V>, MutableMap<K, V> {
    * The trie will be empty after this call returns.
    */
   override fun clear()
+
+  /**
+   * Returns a [MutableSet] of all keys in this trie.
+   */
+  override val keys: MutableSet<K>
+
+  /**
+   * Returns a [MutableCollection] of all values in this trie. Note that this collection may contain duplicate values.
+   */
+  public override val values: MutableCollection<V>
+
+  /**
+   * Returns a [MutableSet] of all key/value pairs in this trie.
+   */
+  public override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
+}
+
+/**
+ * Updates this trie with key/value pairs.
+ */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun <K, V> MutableTrie<K, V>.putAll(from: Collection<Pair<K, V>>) {
+  from.fastForEach { (key, value) -> put(key, value) }
+}
+
+/**
+ * Updates this trie with key/value pairs.
+ */
+@Suppress("NOTHING_TO_INLINE")
+@JvmName("putAllArray")
+public inline fun <K, V> MutableTrie<K, V>.putAll(from: Array<Pair<K, V>>) {
+  from.forEach { (key, value) -> put(key, value) }
 }
 
 /**
