@@ -18,7 +18,7 @@ jobs:
           java-version-file: .ci-java-version
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: wrapper
 
@@ -42,7 +42,7 @@ jobs:
           java-version-file: .ci-java-version
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: wrapper
 
@@ -68,7 +68,7 @@ jobs:
           java-version-file: .ci-java-version
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: wrapper
 
@@ -93,7 +93,7 @@ jobs:
           java-version-file: .ci-java-version
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: wrapper
 
@@ -118,7 +118,7 @@ jobs:
           java-version-file: .ci-java-version
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: wrapper
 
