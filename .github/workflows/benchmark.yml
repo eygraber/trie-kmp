@@ -26,7 +26,7 @@ jobs:
         run: ./gradlew :benchmarks:jvmBenchmark
 
       - name: Upload JVM benchmark
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: jvm_benchmark
           path: benchmarks/build/reports/benchmarks/main/**/
@@ -51,7 +51,7 @@ jobs:
 
 
       - name: Upload Native Linux benchmark
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: linux_x64_benchmark
           path: benchmarks/build/reports/benchmarks/main/**/
@@ -77,7 +77,7 @@ jobs:
 
 
       - name: Upload Node JS benchmark
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: node_js_benchmark
           path: benchmarks/build/reports/benchmarks/main/**/
@@ -102,7 +102,7 @@ jobs:
 
 
       - name: Upload Native Mac ARM64 benchmark
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: mac_arm64_benchmark
           path: benchmarks/build/reports/benchmarks/main/**/
@@ -127,7 +127,7 @@ jobs:
 
 
       - name: Upload Native Mingw benchmark
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: mingw_x64_benchmark
           path: benchmarks/build/reports/benchmarks/main/**/
