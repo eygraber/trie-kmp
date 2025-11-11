@@ -17,7 +17,7 @@ kotlinxBenchmarks = "0.4.14"
 
 ktlint = "1.7.1"
 
-publish = "0.34.0"
+publish = "0.35.0"
 
 [plugins]
 allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
