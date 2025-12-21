@@ -37,7 +37,7 @@ public abstract class AbstractTrie<K, V> : Trie<K, V> {
 
   override fun isEmpty(): Boolean = size == 0
 
-  override fun containsValue(value: V): Boolean = values.any { it == value }
+  override fun containsValue(value: V): Boolean = value in values
 
   override fun containsKey(key: K): Boolean = get(key) != null
 
@@ -78,7 +78,9 @@ public abstract class AbstractMutableTrie<K, V> : MutableTrie<K, V>, AbstractTri
           private val entryIterator = entries.iterator()
           override fun hasNext(): Boolean = entryIterator.hasNext()
           override fun next(): K = entryIterator.next().key
-          override fun remove() = entryIterator.remove()
+          override fun remove() {
+            entryIterator.remove()
+          }
         }
 
       override fun add(element: K): Boolean = throw UnsupportedOperationException()
@@ -94,7 +96,9 @@ public abstract class AbstractMutableTrie<K, V> : MutableTrie<K, V>, AbstractTri
 
           override fun hasNext(): Boolean = entryIterator.hasNext()
           override fun next(): V = entryIterator.next().value
-          override fun remove() = entryIterator.remove()
+          override fun remove() {
+            entryIterator.remove()
+          }
         }
 
       override fun add(element: V): Boolean = throw UnsupportedOperationException()
@@ -122,6 +126,7 @@ public abstract class AbstractMutableTrie<K, V> : MutableTrie<K, V>, AbstractTri
       return oldValue
     }
 
+    @Suppress("NullableToStringCall")
     override fun toString(): String = "$key=$currentValue"
 
     override fun hashCode(): Int = key.hashCode() xor value.hashCode()

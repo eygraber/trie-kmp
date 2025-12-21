@@ -289,6 +289,11 @@ public fun <K, V> emptyGenericTrie(): GenericTrie<K, V> =
   @Suppress("UNCHECKED_CAST") (EmptyGenericTrie as GenericTrie<K, V>)
 
 private object EmptyTrie : Trie<Any, Nothing> {
+  override val size: Int = 0
+  override val keys: Set<List<Nothing>> = emptySet()
+  override val values: MutableCollection<Nothing> = ArrayList(0)
+  override val entries: MutableSet<MutableMap.MutableEntry<Any, Nothing>> = HashSet(0)
+
   override fun startsWith(prefix: Any) = false
 
   override fun getAllWithPrefix(
@@ -299,11 +304,6 @@ private object EmptyTrie : Trie<Any, Nothing> {
     prefix: Any,
   ): Collection<Nothing> = emptyList()
 
-  override val size: Int = 0
-  override val keys: Set<List<Nothing>> = emptySet()
-  override val values: MutableCollection<Nothing> = ArrayList(0)
-  override val entries: MutableSet<MutableMap.MutableEntry<Any, Nothing>> = HashSet(0)
-
   override fun isEmpty(): Boolean = true
   override fun containsKey(key: Any) = false
   override fun containsValue(value: Nothing) = false
@@ -311,6 +311,11 @@ private object EmptyTrie : Trie<Any, Nothing> {
 }
 
 private object EmptyGenericTrie : GenericTrie<Any, Nothing> {
+  override val size: Int = 0
+  override val keys: Set<List<Nothing>> = emptySet()
+  override val values: MutableCollection<Nothing> = ArrayList(0)
+  override val entries: MutableSet<MutableMap.MutableEntry<List<Any>, Nothing>> = HashSet(0)
+
   override fun startsWith(prefix: List<Any>) = false
 
   override fun getAllWithPrefix(
@@ -320,11 +325,6 @@ private object EmptyGenericTrie : GenericTrie<Any, Nothing> {
   override fun getAllValuesWithPrefix(
     prefix: List<Any>,
   ): Collection<Nothing> = emptyList()
-
-  override val size: Int = 0
-  override val keys: Set<List<Nothing>> = emptySet()
-  override val values: MutableCollection<Nothing> = ArrayList(0)
-  override val entries: MutableSet<MutableMap.MutableEntry<List<Any>, Nothing>> = HashSet(0)
 
   override fun isEmpty(): Boolean = true
   override fun containsKey(key: List<Any>) = false

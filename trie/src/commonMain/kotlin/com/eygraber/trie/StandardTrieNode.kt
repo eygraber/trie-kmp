@@ -22,6 +22,7 @@ internal class StandardTrieNode<K, V> {
 
   fun isKeyNode(): Boolean = value != null
 
+  @Suppress("NullableToStringCall")
   override fun toString(): String = "$value=$children"
 
   override fun equals(other: Any?): Boolean {

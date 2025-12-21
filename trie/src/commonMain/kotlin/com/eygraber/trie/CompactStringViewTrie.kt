@@ -66,7 +66,13 @@ public class CompactStringViewTrie<V> : Trie<String, V>, AbstractMutableTrie<Str
     var keyIndex = 0
     while(keyIndex < key.length) {
       val child = currentNode.children[key[keyIndex]] ?: return null
-      val commonPrefixLength = commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, key, keyIndex)
+      val commonPrefixLength = commonPrefixLength(
+        nodeKey = child.sourceKey,
+        nodeStart = child.keyPartStart,
+        nodeEnd = child.keyPartEnd,
+        searchKey = key,
+        searchStart = keyIndex,
+      )
 
       if(commonPrefixLength < child.keyPartLength) {
         return null // Key diverges
@@ -89,12 +95,23 @@ public class CompactStringViewTrie<V> : Trie<String, V>, AbstractMutableTrie<Str
       if(child == null) {
         // No child, create a new branch for the rest of the key.
         // The new node views the key we are currently inserting.
-        currentNode.children[firstChar] = CompactStringViewTrieNode(key, keyIndex, key.length, value)
+        currentNode.children[firstChar] = CompactStringViewTrieNode(
+          sourceKey = key,
+          keyPartStart = keyIndex,
+          keyPartEnd = key.length,
+          value = value,
+        )
         size++
         return null
       }
 
-      val commonPrefixLength = commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, key, keyIndex)
+      val commonPrefixLength = commonPrefixLength(
+        nodeKey = child.sourceKey,
+        nodeStart = child.keyPartStart,
+        nodeEnd = child.keyPartEnd,
+        searchKey = key,
+        searchStart = keyIndex,
+      )
 
       if(commonPrefixLength == child.keyPartLength) {
         // The existing node's key is a prefix of our key.
@@ -173,7 +190,13 @@ public class CompactStringViewTrie<V> : Trie<String, V>, AbstractMutableTrie<Str
     val firstChar = key[keyIndex]
     val child = currentNode.children[firstChar] ?: return null to false
 
-    val commonPrefixLength = commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, key, keyIndex)
+    val commonPrefixLength = commonPrefixLength(
+      nodeKey = child.sourceKey,
+      nodeStart = child.keyPartStart,
+      nodeEnd = child.keyPartEnd,
+      searchKey = key,
+      searchStart = keyIndex,
+    )
     if(commonPrefixLength < child.keyPartLength) return null to false
 
     val (oldValue, removed) = removeRecursive(child, key, keyIndex + commonPrefixLength)
@@ -225,8 +248,13 @@ public class CompactStringViewTrie<V> : Trie<String, V>, AbstractMutableTrie<Str
     var keyIndex = 0
     while(keyIndex < prefix.length) {
       val child = currentNode.children[prefix[keyIndex]] ?: return false
-      val commonPrefixLength =
-        commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, prefix, keyIndex)
+      val commonPrefixLength = commonPrefixLength(
+        nodeKey = child.sourceKey,
+        nodeStart = child.keyPartStart,
+        nodeEnd = child.keyPartEnd,
+        searchKey = prefix,
+        searchStart = keyIndex,
+      )
       if(commonPrefixLength < child.keyPartLength && keyIndex + commonPrefixLength < prefix.length) {
         return false
       }
@@ -248,8 +276,13 @@ public class CompactStringViewTrie<V> : Trie<String, V>, AbstractMutableTrie<Str
 
     while(keyIndex < prefix.length) {
       val child = currentNode.children[prefix[keyIndex]] ?: return emptyMap()
-      val commonPrefixLength =
-        commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, prefix, keyIndex)
+      val commonPrefixLength = commonPrefixLength(
+        nodeKey = child.sourceKey,
+        nodeStart = child.keyPartStart,
+        nodeEnd = child.keyPartEnd,
+        searchKey = prefix,
+        searchStart = keyIndex,
+      )
       if(commonPrefixLength < child.keyPartLength && keyIndex + commonPrefixLength < prefix.length) {
         return emptyMap()
       }
@@ -280,8 +313,14 @@ public class CompactStringViewTrie<V> : Trie<String, V>, AbstractMutableTrie<Str
 
     while(keyIndex < prefix.length) {
       val child = currentNode.children[prefix[keyIndex]] ?: return emptyList()
-      val commonPrefixLength =
-        commonPrefixLength(child.sourceKey, child.keyPartStart, child.keyPartEnd, prefix, keyIndex)
+      val commonPrefixLength = commonPrefixLength(
+        nodeKey = child.sourceKey,
+        nodeStart = child.keyPartStart,
+        nodeEnd = child.keyPartEnd,
+        searchKey = prefix,
+        searchStart = keyIndex,
+      )
+
       if(commonPrefixLength < child.keyPartLength && keyIndex + commonPrefixLength < prefix.length) {
         return emptyList()
       }
@@ -342,14 +381,16 @@ private class CompactStringViewTrieNode<V>(
   val children = SimpleArrayMap<Char, CompactStringViewTrieNode<V>>()
 
   val keyPart: CharSequence
-    get() = sourceKey.subSequence(keyPartStart, keyPartEnd)
+    get() = sourceKey.subSequence(startIndex = keyPartStart, endIndex = keyPartEnd)
 
   val keyPartLength: Int
     get() = keyPartEnd - keyPartStart
 
   fun isKeyNode(): Boolean = value != null
 
+  @Suppress("NullableToStringCall")
   override fun toString(): String = "$value=$children"
+
   override fun equals(other: Any?): Boolean {
     if(this === other) return true
     if(other == null || this::class != other::class) return false
