@@ -1,17 +1,17 @@
 import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
 
 plugins {
+  id("com.android.lint")
   id("com.eygraber.conventions-kotlin-multiplatform")
-  id("com.eygraber.conventions-android-library")
+  id("com.eygraber.conventions-android-kmp-library")
   id("com.eygraber.conventions-detekt2")
 }
 
-android {
-  namespace = "com.eygraber.trie.utils"
-}
-
 kotlin {
-  defaultKmpTargets(project)
+  defaultKmpTargets(
+    project,
+    androidNamespace = "com.eygraber.trie.utils",
+  )
 
   sourceSets {
     commonMain.dependencies {

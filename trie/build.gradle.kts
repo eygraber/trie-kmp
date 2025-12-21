@@ -1,16 +1,16 @@
 plugins {
+  id("com.android.lint")
   id("com.eygraber.conventions-kotlin-multiplatform")
-  id("com.eygraber.conventions-android-library")
+  id("com.eygraber.conventions-android-kmp-library")
   id("com.eygraber.conventions-detekt2")
   id("com.eygraber.conventions-publish-maven-central")
 }
 
-android {
-  namespace = "com.eygraber.trie"
-}
-
 kotlin {
-  defaultKmpTargets(project)
+  defaultKmpTargets(
+    project,
+    androidNamespace = "com.eygraber.trie",
+  )
 
   sourceSets {
     commonMain.dependencies {
