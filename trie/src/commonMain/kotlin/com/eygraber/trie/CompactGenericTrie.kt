@@ -83,7 +83,10 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractMutabl
 
       if(child == null) {
         // No child, create a new branch for the rest of the key
-        currentNode.children[firstElement] = CompactTrieNode(key.subList(keyIndex, key.size), value)
+        currentNode.children[firstElement] = CompactTrieNode(
+          keyPart = key.subList(fromIndex = keyIndex, toIndex = key.size),
+          value = value,
+        )
         internalSize++
         return null
       }
@@ -99,14 +102,14 @@ public class CompactGenericTrie<K, V> : MutableGenericTrie<K, V>, AbstractMutabl
       }
 
       // --- Split is required ---
-      val remainderOfOriginalKey = child.keyPart.subList(commonPrefixLength, child.keyPart.size)
-      val remainderOfNewKey = key.subList(keyIndex + commonPrefixLength, key.size)
+      val remainderOfOriginalKey = child.keyPart.subList(fromIndex = commonPrefixLength, toIndex = child.keyPart.size)
+      val remainderOfNewKey = key.subList(fromIndex = keyIndex + commonPrefixLength, toIndex = key.size)
 
       val newOriginalNode = CompactTrieNode(remainderOfOriginalKey, child.value).apply {
         children.putAll(child.children)
       }
 
-      child.keyPart = child.keyPart.subList(0, commonPrefixLength)
+      child.keyPart = child.keyPart.subList(fromIndex = 0, toIndex = commonPrefixLength)
       child.children.clear()
       child.children[newOriginalNode.keyPart.first()] = newOriginalNode
 
@@ -307,6 +310,7 @@ internal class CompactTrieNode<K, V>(
 
   fun isKeyNode(): Boolean = value != null
 
+  @Suppress("NullableToStringCall")
   override fun toString(): String = "$value=$children"
 
   override fun equals(other: Any?): Boolean {

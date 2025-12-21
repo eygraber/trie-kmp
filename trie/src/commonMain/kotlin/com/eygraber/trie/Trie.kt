@@ -88,6 +88,21 @@ public operator fun <K, V> Trie<K, V>.contains(key: K): Boolean = containsKey(ke
  */
 public interface MutableTrie<K, V> : Trie<K, V>, MutableMap<K, V> {
   /**
+   * Returns a [MutableSet] of all keys in this trie.
+   */
+  override val keys: MutableSet<K>
+
+  /**
+   * Returns a [MutableCollection] of all values in this trie. Note that this collection may contain duplicate values.
+   */
+  public override val values: MutableCollection<V>
+
+  /**
+   * Returns a [MutableSet] of all key/value pairs in this trie.
+   */
+  public override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
+
+  /**
    * Associates the specified [value] with the specified [key] in this trie.
    * If the trie previously contained a mapping for the key, the old value is replaced.
    *
@@ -118,21 +133,6 @@ public interface MutableTrie<K, V> : Trie<K, V>, MutableMap<K, V> {
    * The trie will be empty after this call returns.
    */
   override fun clear()
-
-  /**
-   * Returns a [MutableSet] of all keys in this trie.
-   */
-  override val keys: MutableSet<K>
-
-  /**
-   * Returns a [MutableCollection] of all values in this trie. Note that this collection may contain duplicate values.
-   */
-  public override val values: MutableCollection<V>
-
-  /**
-   * Returns a [MutableSet] of all key/value pairs in this trie.
-   */
-  public override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
 }
 
 /**

@@ -27,7 +27,7 @@ internal fun <T> List<T>.commonPrefixLength(other: List<T>, otherOffset: Int = 0
     return minLength
   }
   else {
-    return zip(other).takeWhile { it.first == it.second }.count()
+    return asSequence().zip(other.asSequence()).takeWhile { it.first == it.second }.count()
   }
 }
 

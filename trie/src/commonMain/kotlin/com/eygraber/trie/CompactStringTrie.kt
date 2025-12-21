@@ -305,6 +305,7 @@ private class CompactStringTrieNode<V>(
 
   fun isKeyNode(): Boolean = value != null
 
+  @Suppress("NullableToStringCall")
   override fun toString(): String = "$value=$children"
 
   override fun equals(other: Any?): Boolean {
