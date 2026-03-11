@@ -32,7 +32,7 @@ buildscript-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", versio
 buildscript-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 buildscript-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "publish" }
 
-androidx-collections = "androidx.collection:collection:1.5.0"
+androidx-collections = "androidx.collection:collection:1.6.0"
 
 kotlinx-benchmarks = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmarks" }
 
