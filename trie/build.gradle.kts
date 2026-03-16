@@ -21,7 +21,6 @@ kotlin {
       implementation(projects.utils)
 
       implementation(libs.test.kotlin)
-      implementation(libs.test.kotlin.annotations)
     }
   }
 }
