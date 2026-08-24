@@ -29,6 +29,12 @@ jobs:
         with:
           gradle-version: wrapper
 
+      - name: Print benchmarks build environment (temporary diagnostics)
+        run: ./gradlew :benchmarks:buildEnvironment
+
+      - name: Run failing benchmark generate task with stacktrace (temporary diagnostics)
+        run: ./gradlew :benchmarks:linuxX64BenchmarkGenerate --stacktrace
+
       - name: Run assemble task
         run: ./gradlew assemble
 
