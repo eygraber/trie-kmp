@@ -4,7 +4,22 @@ plugins {
   id("com.eygraber.conventions-kotlin-multiplatform")
   id("com.eygraber.conventions-detekt2")
   alias(libs.plugins.allopen)
-  alias(libs.plugins.benchmarks)
+  // Applied from the root buildscript classpath (not via alias) so that the newer
+  // kotlin-util-klib(-metadata) forced there wins over the stale 2.2.0 pins in
+  // kotlinx-benchmark-plugin 0.4.18. See the comment in the root build.gradle.kts.
+  id("org.jetbrains.kotlinx.benchmark")
+}
+
+// Belt and braces for the same kotlinx-benchmark 0.4.18 issue: if the benchmark source
+// generator resolves its worker classpath through a project configuration, make sure the
+// klib utils match the project's Kotlin version instead of the plugin's stale 2.2.0 pins.
+configurations.configureEach {
+  resolutionStrategy {
+    force(
+      "org.jetbrains.kotlin:kotlin-util-klib:${libs.versions.kotlin.get()}",
+      "org.jetbrains.kotlin:kotlin-util-klib-metadata:${libs.versions.kotlin.get()}",
+    )
+  }
 }
 
 kotlin {

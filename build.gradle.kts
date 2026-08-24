@@ -6,10 +6,19 @@ buildscript {
   dependencies {
     classpath(libs.buildscript.android)
     classpath(libs.buildscript.androidCacheFix)
+    classpath(libs.buildscript.benchmarks)
     classpath(libs.buildscript.detekt)
     classpath(libs.buildscript.dokka)
     classpath(libs.buildscript.kotlin)
     classpath(libs.buildscript.publish)
+
+    // kotlinx-benchmark-plugin 0.4.18 pins kotlin-util-klib(-metadata) to 2.2.0, which lacks
+    // KotlinLibrary.getModuleHeaderData() that its NativeSourceGeneratorWorker calls
+    // (Kotlin/kotlinx-benchmark#390). Resolving the plugin here alongside the klib utils that
+    // match the project's Kotlin version lets Gradle upgrade those modules so native benchmark
+    // source generation works. Remove once kotlinx-benchmark ships with corrected klib pins.
+    classpath("org.jetbrains.kotlin:kotlin-util-klib:${libs.versions.kotlin.get()}")
+    classpath("org.jetbrains.kotlin:kotlin-util-klib-metadata:${libs.versions.kotlin.get()}")
   }
 }
 
