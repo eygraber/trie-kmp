@@ -26,7 +26,6 @@ conventions = { id = "com.eygraber.conventions", version.ref = "conventions" }
 
 [libraries]
 buildscript-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
-buildscript-benchmarks = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-plugin", version.ref = "kotlinxBenchmarks" }
 buildscript-androidCacheFix = { module = "gradle.plugin.org.gradle.android:android-cache-fix-gradle-plugin", version = "3.0.3" }
 buildscript-detekt = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 buildscript-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }

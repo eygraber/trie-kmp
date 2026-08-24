@@ -4,22 +4,7 @@ plugins {
   id("com.eygraber.conventions-kotlin-multiplatform")
   id("com.eygraber.conventions-detekt2")
   alias(libs.plugins.allopen)
-  // Applied from the root buildscript classpath (not via alias) so that the newer
-  // kotlin-util-klib(-metadata) forced there wins over the stale 2.2.0 pins in
-  // kotlinx-benchmark-plugin 0.4.18. See the comment in the root build.gradle.kts.
-  id("org.jetbrains.kotlinx.benchmark")
-}
-
-// Belt and braces for the same kotlinx-benchmark 0.4.18 issue: if the benchmark source
-// generator resolves its worker classpath through a project configuration, make sure the
-// klib utils match the project's Kotlin version instead of the plugin's stale 2.2.0 pins.
-configurations.configureEach {
-  resolutionStrategy {
-    force(
-      "org.jetbrains.kotlin:kotlin-util-klib:${libs.versions.kotlin.get()}",
-      "org.jetbrains.kotlin:kotlin-util-klib-metadata:${libs.versions.kotlin.get()}",
-    )
-  }
+  alias(libs.plugins.benchmarks)
 }
 
 kotlin {
@@ -52,6 +37,14 @@ allOpen {
 }
 
 benchmark {
+  // kotlinx-benchmark 0.4.18 defaults the benchmark generator's kotlin-compiler-embeddable to
+  // the project's Kotlin version, but its native source generator calls
+  // KotlinLibrary.getModuleHeaderData(), which was removed from KotlinLibrary in Kotlin 2.3.20
+  // (moved to KlibMetadataComponent), so generation fails with a NoSuchMethodError on any
+  // project using Kotlin >= 2.3.20. Pin the generator's compiler to the last version that
+  // still has that API. Remove once kotlinx-benchmark ships a fix.
+  kotlinCompilerVersion = "2.3.10"
+
   targets {
     register("js")
     register("jvm")
