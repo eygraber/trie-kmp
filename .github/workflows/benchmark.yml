@@ -20,7 +20,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: wrapper
+          gradle-version: 9.7.1
 
       - name: Run JVM benchmark
         run: ./gradlew :benchmarks:jvmBenchmark
@@ -44,7 +44,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: wrapper
+          gradle-version: 9.7.1
 
       - name: Run Native Linux benchmark
         run: ./gradlew :benchmarks:linuxX64Benchmark
@@ -70,7 +70,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: wrapper
+          gradle-version: 9.7.1
 
       - name: Run Node JS benchmark
         run: ./gradlew :benchmarks:jsBenchmark
@@ -95,7 +95,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: wrapper
+          gradle-version: 9.7.1
 
       - name: Run Native Mac ARM64 benchmark
         run: ./gradlew :benchmarks:macosArm64Benchmark
@@ -120,7 +120,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: wrapper
+          gradle-version: 9.7.1
 
       - name: Run Native Mingw benchmark
         run: ./gradlew :benchmarks:mingwX64Benchmark
